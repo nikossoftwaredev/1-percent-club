@@ -17,25 +17,194 @@ model User {
   name          String?
   image         String?
   emailVerified DateTime? @map("email_verified")
+  role          UserRole  @default(USER)
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")
 
-  todos         Todo[]
+  // Relations
+  gameProgress  GameProgress[]
+  favoriteQuestions FavoriteQuestion[]
+  episodeProgress EpisodeProgress[]
 
   @@map("users")
 }
 
-model Todo {
+enum UserRole {
+  USER
+  ADMIN
+  MODERATOR
+}
+
+model Country {
   id          String   @id @default(cuid())
-  title       String
-  description String?
-  completed   Boolean  @default(false)
+  code        String   @unique // e.g., "GB", "US", "AU", "NL", "FR", "DE", "ES"
+  name        String   @unique // e.g., "United Kingdom", "United States"
+  slug        String   @unique // URL-friendly version e.g., "united-kingdom", "australia"
+  flagEmoji   String?  // e.g., "🇬🇧", "🇺🇸"
+  seoTitle    String?  @map("seo_title") @db.Text // SEO title for country page
+  seoDescription String? @map("seo_description") @db.Text // SEO description for country page
+  isActive    Boolean  @default(true)
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
+  // Relations
+  seasons     Season[]
+
+  @@index([code])
+  @@index([slug])
+  @@map("countries")
+}
+
+model Season {
+  id          String   @id @default(cuid())
+  number      Int      // Season 1, 2, 3, etc.
+  title       String?  // Season title for display
+  year        Int?     // Year the season aired
+  description String?  @db.Text
+  imageUrl    String?  @map("image_url") // Image for season card display
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  countryId   String   @map("country_id")
+  country     Country  @relation(fields: [countryId], references: [id], onDelete: Cascade)
+  episodes    Episode[]
+
+  @@unique([countryId, number])
+  @@index([countryId])
+  @@map("seasons")
+}
+
+model Episode {
+  id          String   @id @default(cuid())
+  number      Int      // Episode 1, 2, 3, etc.
+  title       String?
+  airDate     DateTime? @map("air_date")
+  description String?  @db.Text
+  imageUrl    String?  @map("image_url") // Thumbnail for episode
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  seasonId    String   @map("season_id")
+  season      Season   @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  questions   Question[]
+  episodeProgress EpisodeProgress[]
+
+  @@unique([seasonId, number])
+  @@index([seasonId])
+  @@map("episodes")
+}
+
+model Question {
+  id            String   @id @default(cuid())
+  questionText  String   @db.Text @map("question_text")
+  questionImage String?  @map("question_image") // URL to uploaded image
+  difficulty    DifficultyLevel
+  explanation   String   @db.Text // Explanation of the correct answer
+  orderInShow   Int?     @map("order_in_show") // The order this question appeared in the episode
+  timeLimit     Int?     @map("time_limit") // Time limit in seconds
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  episodeId     String   @map("episode_id")
+  episode       Episode  @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+  answers       Answer[]
+  gameProgress  GameProgress[]
+  favorites     FavoriteQuestion[]
+
+  @@index([episodeId])
+  @@index([difficulty])
+  @@map("questions")
+}
+
+enum DifficultyLevel {
+  NINETY      @map("90")
+  EIGHTY      @map("80")
+  SEVENTY     @map("70")
+  SIXTY       @map("60")
+  FIFTY       @map("50")
+  FORTY       @map("40")
+  THIRTY      @map("30")
+  TWENTY      @map("20")
+  FIFTEEN     @map("15")
+  TEN         @map("10")
+  FIVE        @map("5")
+  ONE         @map("1")
+}
+
+model Answer {
+  id          String   @id @default(cuid())
+  answerText  String   @db.Text @map("answer_text")
+  answerImage String?  @map("answer_image") // URL to uploaded image for this answer option
+  isCorrect   Boolean  @default(false) @map("is_correct")
+  orderIndex  Int      @map("order_index") // Order of the answer option (A, B, C, D)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  questionId  String   @map("question_id")
+  question    Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@index([questionId])
+  @@map("answers")
+}
+
+model GameProgress {
+  id              String   @id @default(cuid())
+  answeredCorrect Boolean  @map("answered_correct")
+  timeSpent       Int?     @map("time_spent") // Time spent in seconds
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  // Relations
+  userId          String   @map("user_id")
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  questionId      String   @map("question_id")
+  question        Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, questionId])
+  @@index([userId])
+  @@index([questionId])
+  @@map("game_progress")
+}
+
+model FavoriteQuestion {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  // Relations
   userId      String   @map("user_id")
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  questionId  String   @map("question_id")
+  question    Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
+  @@unique([userId, questionId])
   @@index([userId])
-  @@map("todos")
+  @@index([questionId])
+  @@map("favorite_questions")
+}
+
+model EpisodeProgress {
+  id              String   @id @default(cuid())
+  completedAt     DateTime? @map("completed_at") // When the user completed the episode
+  score           Int?     // Number of correct answers
+  totalQuestions  Int?     @map("total_questions") // Total questions in the episode
+  isCompleted     Boolean  @default(false) @map("is_completed")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  userId          String   @map("user_id")
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  episodeId       String   @map("episode_id")
+  episode         Episode  @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, episodeId])
+  @@index([userId])
+  @@index([episodeId])
+  @@map("episode_progress")
 }
