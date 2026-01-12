@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "@/lib/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -10,67 +10,110 @@ interface EpisodeQuizPageProps {
   params: Promise<{ locale: string; country: string; season: string; episode: string }>;
 }
 
+// Static data moved outside component to prevent recreation
+const difficultyColors: Record<string, string> = {
+  NINETY: "bg-green-500",
+  EIGHTY: "bg-green-400",
+  SEVENTY: "bg-yellow-400",
+  SIXTY: "bg-yellow-500",
+  FIFTY: "bg-orange-400",
+  FORTY: "bg-orange-500",
+  THIRTY: "bg-red-400",
+  TWENTY: "bg-red-500",
+  FIFTEEN: "bg-red-600",
+  TEN: "bg-purple-500",
+  FIVE: "bg-purple-600",
+  ONE: "bg-purple-700",
+};
+
+const difficultyLabels: Record<string, string> = {
+  NINETY: "90%",
+  EIGHTY: "80%",
+  SEVENTY: "70%",
+  SIXTY: "60%",
+  FIFTY: "50%",
+  FORTY: "40%",
+  THIRTY: "30%",
+  TWENTY: "20%",
+  FIFTEEN: "15%",
+  TEN: "10%",
+  FIVE: "5%",
+  ONE: "1%",
+};
+
+// TODO: Fetch episode questions from database
+const episodeData = {
+  title: "Episode 1",
+  country: "United Kingdom",
+  season: 1,
+  questions: [
+    {
+      id: "1",
+      questionText: "If you were to spell out numbers, how far would you have to go until you would find the letter 'A'?",
+      difficulty: "NINETY",
+      timeLimit: 30,
+      explanation: "The first time the letter 'A' appears when spelling out numbers is in 'one thousAnd'. Numbers from 1-999 don't contain the letter A.",
+      answers: [
+        { id: "1", text: "One Hundred", isCorrect: false },
+        { id: "2", text: "One Thousand", isCorrect: true },
+        { id: "3", text: "One Million", isCorrect: false },
+        { id: "4", text: "Ten", isCorrect: false },
+      ],
+    },
+    {
+      id: "2",
+      questionText: "What gets wetter the more it dries?",
+      difficulty: "EIGHTY",
+      timeLimit: 30,
+      explanation: "A towel gets wetter as it dries other things or people.",
+      answers: [
+        { id: "1", text: "A sponge", isCorrect: false },
+        { id: "2", text: "A towel", isCorrect: true },
+        { id: "3", text: "Hair", isCorrect: false },
+        { id: "4", text: "Clothes", isCorrect: false },
+      ],
+    },
+    {
+      id: "3",
+      questionText: "How many months have 28 days?",
+      difficulty: "SEVENTY",
+      timeLimit: 30,
+      explanation: "All 12 months have at least 28 days. February has exactly 28 days in non-leap years, but every month has 28 days or more.",
+      answers: [
+        { id: "1", text: "1", isCorrect: false },
+        { id: "2", text: "2", isCorrect: false },
+        { id: "3", text: "12", isCorrect: true },
+        { id: "4", text: "6", isCorrect: false },
+      ],
+    },
+  ],
+};
+
+const DEFAULT_TIME = 30;
+
 const EpisodeQuizPage = ({ params }: EpisodeQuizPageProps) => {
   const router = useRouter();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showExplanation, setShowExplanation] = useState(false);
   const [score, setScore] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(30);
+  const [timeLeft, setTimeLeft] = useState(DEFAULT_TIME);
   const [isQuizComplete, setIsQuizComplete] = useState(false);
-  const [userAnswers, setUserAnswers] = useState<(number | null)[]>([]);
-
-  // TODO: Fetch episode questions from database
-  const episodeData = {
-    title: "Episode 1",
-    country: "United Kingdom",
-    season: 1,
-    questions: [
-      {
-        id: "1",
-        questionText: "If you were to spell out numbers, how far would you have to go until you would find the letter 'A'?",
-        difficulty: "NINETY",
-        timeLimit: 30,
-        explanation: "The first time the letter 'A' appears when spelling out numbers is in 'one thousAnd'. Numbers from 1-999 don't contain the letter A.",
-        answers: [
-          { id: "1", text: "One Hundred", isCorrect: false },
-          { id: "2", text: "One Thousand", isCorrect: true },
-          { id: "3", text: "One Million", isCorrect: false },
-          { id: "4", text: "Ten", isCorrect: false }
-        ]
-      },
-      {
-        id: "2",
-        questionText: "What gets wetter the more it dries?",
-        difficulty: "EIGHTY",
-        timeLimit: 30,
-        explanation: "A towel gets wetter as it dries other things or people.",
-        answers: [
-          { id: "1", text: "A sponge", isCorrect: false },
-          { id: "2", text: "A towel", isCorrect: true },
-          { id: "3", text: "Hair", isCorrect: false },
-          { id: "4", text: "Clothes", isCorrect: false }
-        ]
-      },
-      {
-        id: "3",
-        questionText: "How many months have 28 days?",
-        difficulty: "SEVENTY",
-        timeLimit: 30,
-        explanation: "All 12 months have at least 28 days. February has exactly 28 days in non-leap years, but every month has 28 days or more.",
-        answers: [
-          { id: "1", text: "1", isCorrect: false },
-          { id: "2", text: "2", isCorrect: false },
-          { id: "3", text: "12", isCorrect: true },
-          { id: "4", text: "6", isCorrect: false }
-        ]
-      }
-    ]
-  };
+  // Track user answers for potential review feature
+  const [_userAnswers, setUserAnswers] = useState<(number | null)[]>([]);
 
   const currentQuestion = episodeData.questions[currentQuestionIndex];
   const totalQuestions = episodeData.questions.length;
   const progress = ((currentQuestionIndex + 1) / totalQuestions) * 100;
+
+  const handleTimeUp = useCallback(() => {
+    setShowExplanation(true);
+    setUserAnswers((prev) => {
+      const newAnswers = [...prev];
+      newAnswers[currentQuestionIndex] = null;
+      return newAnswers;
+    });
+  }, [currentQuestionIndex]);
 
   // Timer effect
   useEffect(() => {
@@ -80,21 +123,14 @@ const EpisodeQuizPage = ({ params }: EpisodeQuizPageProps) => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           handleTimeUp();
-          return 30;
+          return DEFAULT_TIME;
         }
         return prev - 1;
       });
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [currentQuestionIndex, showExplanation, isQuizComplete]);
-
-  const handleTimeUp = () => {
-    setShowExplanation(true);
-    const newAnswers = [...userAnswers];
-    newAnswers[currentQuestionIndex] = null;
-    setUserAnswers(newAnswers);
-  };
+  }, [currentQuestionIndex, showExplanation, isQuizComplete, handleTimeUp]);
 
   const handleAnswerSelect = (answerIndex: number) => {
     if (showExplanation) return;
@@ -105,23 +141,23 @@ const EpisodeQuizPage = ({ params }: EpisodeQuizPageProps) => {
     if (selectedAnswer === null) return;
 
     const isCorrect = currentQuestion.answers[selectedAnswer].isCorrect;
-    if (isCorrect) {
-      setScore(score + 1);
-    }
+    if (isCorrect) setScore((prev) => prev + 1);
 
-    const newAnswers = [...userAnswers];
-    newAnswers[currentQuestionIndex] = selectedAnswer;
-    setUserAnswers(newAnswers);
+    setUserAnswers((prev) => {
+      const newAnswers = [...prev];
+      newAnswers[currentQuestionIndex] = selectedAnswer;
+      return newAnswers;
+    });
 
     setShowExplanation(true);
   };
 
   const handleNextQuestion = () => {
     if (currentQuestionIndex < totalQuestions - 1) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
+      setCurrentQuestionIndex((prev) => prev + 1);
       setSelectedAnswer(null);
       setShowExplanation(false);
-      setTimeLeft(30);
+      setTimeLeft(DEFAULT_TIME);
     } else {
       setIsQuizComplete(true);
     }
@@ -132,28 +168,22 @@ const EpisodeQuizPage = ({ params }: EpisodeQuizPageProps) => {
     router.push(`/countries/${resolvedParams.country}/seasons/${resolvedParams.season}/episodes`);
   };
 
-  const difficultyColors: Record<string, string> = {
-    NINETY: "bg-green-500",
-    EIGHTY: "bg-green-400",
-    SEVENTY: "bg-yellow-400",
-    SIXTY: "bg-yellow-500",
-    FIFTY: "bg-orange-400",
-    FORTY: "bg-orange-500",
-    THIRTY: "bg-red-400",
-    TWENTY: "bg-red-500",
-    FIFTEEN: "bg-red-600",
-    TEN: "bg-purple-500",
-    FIVE: "bg-purple-600",
-    ONE: "bg-purple-700"
-  };
+  const getDifficultyLabel = (difficulty: string) =>
+    difficultyLabels[difficulty] || difficulty;
 
-  const getDifficultyLabel = (difficulty: string) => {
-    const percentages: Record<string, string> = {
-      NINETY: "90%", EIGHTY: "80%", SEVENTY: "70%", SIXTY: "60%",
-      FIFTY: "50%", FORTY: "40%", THIRTY: "30%", TWENTY: "20%",
-      FIFTEEN: "15%", TEN: "10%", FIVE: "5%", ONE: "1%"
-    };
-    return percentages[difficulty] || difficulty;
+  const getAnswerButtonStyle = (index: number, isCorrect: boolean): string => {
+    const isSelected = selectedAnswer === index;
+
+    if (isSelected && showExplanation) {
+      if (isCorrect) return "border-green-500 bg-green-500/10";
+      return "border-red-500 bg-red-500/10";
+    }
+
+    if (isSelected) return "border-primary bg-primary/10";
+
+    if (showExplanation && isCorrect) return "border-green-500 bg-green-500/10";
+
+    return "border-border hover:border-primary/50";
   };
 
   if (isQuizComplete) {
@@ -232,17 +262,7 @@ const EpisodeQuizPage = ({ params }: EpisodeQuizPageProps) => {
               key={answer.id}
               onClick={() => handleAnswerSelect(index)}
               disabled={showExplanation}
-              className={`w-full text-left p-4 rounded-lg border transition-all ${
-                selectedAnswer === index
-                  ? showExplanation
-                    ? answer.isCorrect
-                      ? 'border-green-500 bg-green-500/10'
-                      : 'border-red-500 bg-red-500/10'
-                    : 'border-primary bg-primary/10'
-                  : showExplanation && answer.isCorrect
-                  ? 'border-green-500 bg-green-500/10'
-                  : 'border-border hover:border-primary/50'
-              }`}
+              className={`w-full text-left p-4 rounded-lg border transition-all ${getAnswerButtonStyle(index, answer.isCorrect)}`}
             >
               <div className="flex items-center gap-3">
                 <span className="font-semibold">

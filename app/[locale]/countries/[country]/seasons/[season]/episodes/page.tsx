@@ -5,7 +5,7 @@ import { Link } from "@/lib/i18n/navigation";
 import { ThemeSwitcher } from "@/components/examples/ThemeSwitcher";
 import { LoginButton } from "@/components/examples/login-button";
 import { LanguageSwitcher } from "@/components/examples/language-switcher";
-import { ArrowLeft, Calendar, Clock, CheckCircle2, Circle } from "lucide-react";
+import { ArrowLeft, Calendar, CheckCircle2, Circle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface EpisodesPageProps {
@@ -111,8 +111,6 @@ const EpisodesPage = async ({ params }: EpisodesPageProps) => {
       }
     ]
   };
-
-  const completedEpisodes = seasonData.episodes.filter(ep => ep.progress?.isCompleted).length;
 
   return (
     <div className="flex min-h-screen flex-col">
