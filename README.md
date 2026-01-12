@@ -1,72 +1,109 @@
-# Next.js Auth + Internationalization + Prisma Starter
+# The 1% Club - Global Trivia Platform
 
-A modern full-stack starter template built with Next.js 16, NextAuth.js, Prisma ORM, and next-intl for internationalization.
+A comprehensive trivia platform featuring all episodes and seasons from The 1% Club game show across all countries. Test your knowledge with questions that challenge different percentages of the population!
 
-## 🚀 Quick Start
+## 🎮 Features
 
-### Use this template
+### For Players
+- **Complete Question Database**: Access all questions, answers, and detailed explanations from every episode
+- **Multi-Country Content**: Browse and play questions from all countries that have aired The 1% Club
+- **Season & Episode Organization**: Navigate through content organized by country, season, and episode
+- **User Authentication**: Sign in to track your progress and save your favorite questions
+- **Beautiful UI**: Enjoy a modern, responsive interface designed for an engaging trivia experience
+- **Progress Tracking**: Monitor your performance and see how you compare to the actual show statistics
 
-Click the **"Use this template"** button on GitHub or use this direct link:
+### For Administrators
+- **Admin Panel**: Comprehensive dashboard for content management
+- **Content Management**:
+  - Add new countries as the show expands globally
+  - Create and manage seasons for each country
+  - Add individual episodes with metadata
+  - Input questions with multiple choice answers
+  - Provide detailed explanations for each answer
+- **Bulk Operations**: Import multiple questions at once
+- **Content Moderation**: Review and approve user-submitted corrections
 
-[![Use this template](https://img.shields.io/badge/Use%20this%20template-2ea44f?style=for-the-badge)](https://github.com/nikossoftwaredev/next-auth-intl-prisma-starter/generate)
+## 🌍 Available Countries
+- United Kingdom
+- Australia
+- United States
+- Netherlands
+- France
+- Germany
+- Spain
+- (More countries added as they air the show)
 
-This will create a new repository in your GitHub account with all the starter code.
+## 📊 Question Structure
+Each question includes:
+- **Difficulty Percentage** (90%, 80%, 70%, etc.)
+- **Question Text**
+- **Multiple Choice Options**
+- **Correct Answer**
+- **Detailed Explanation**
+- **Episode Reference** (Country, Season, Episode number)
+- **Air Date**
 
-## Features
+## 🛠️ Tech Stack
+- **Frontend**: Next.js 16 with React Server Components
+- **Authentication**: NextAuth.js with Google OAuth
+- **Database**: PostgreSQL (Supabase)
+- **Internationalization**: next-intl (English & Greek)
+- **UI Components**: shadcn/ui with Tailwind CSS
+- **Type Safety**: TypeScript with strict mode
+- **Package Manager**: PNPM for fast, efficient dependency management
 
-- 🔐 **Authentication** with NextAuth.js (Google OAuth, easily extendable)
-- 🗄️ **Database** integration with Prisma ORM + Supabase (PostgreSQL)
-- 🌍 **Internationalization** with next-intl (English, Greek & Spanish)
-- 📝 **Todo CRUD** functionality with user-specific data
-- 🌙 **Dark/Light Mode** with next-themes and system preference detection
-- 🎨 **UI Components** from shadcn/ui (Radix UI + Tailwind CSS)
-- 📘 **TypeScript** with strict mode for better DX
-- ⚡ **Server Actions** for secure database operations
-- 🚀 **Next.js 15** with App Router and Turbopack
-- 📦 **PNPM** for fast, efficient package management
-- 🔧 **ESLint & Prettier** configured with best practices
+## 🎯 Game Modes
 
-## Prerequisites
+### Classic Mode
+Play through episodes exactly as they aired on TV, with questions in the original order and difficulty progression.
 
+### Practice Mode
+Select specific difficulty levels to practice and improve your skills.
+
+### Random Challenge
+Get random questions from any country, season, or episode for variety.
+
+### Country Championship
+Compete with questions specifically from your selected country's version of the show.
+
+## 📱 Responsive Design
+The platform is fully responsive and works seamlessly on:
+- Desktop computers
+- Tablets
+- Mobile phones
+
+## 🚀 Getting Started
+
+### Prerequisites
 - Node.js 18+
-- PNPM (required package manager)
-- PostgreSQL database
+- PNPM package manager
+- PostgreSQL database (or Supabase account)
 
-## Getting Started
+### Installation
 
-### 1. Clone the repository or use the template
-
-**Option A: Use as a template (recommended)**
-1. Click the "Use this template" button on GitHub
-2. Clone your new repository:
+1. Clone the repository:
 ```bash
-git clone <your-new-repo-url>
-cd <your-repo-name>
+git clone https://github.com/yourusername/1-percent-club.git
+cd 1-percent-club
 ```
 
-**Option B: Clone directly**
-```bash
-git clone https://github.com/nikossoftwaredev/next-auth-intl-prisma-starter.git
-cd next-auth-intl-prisma-starter
-```
-
-### 2. Install dependencies
-
+2. Install dependencies:
 ```bash
 pnpm install
 ```
 
-### 3. Set up environment variables
+3. Set up environment variables:
+```bash
+cp .env.example .env.local
+```
 
-Create a `.env.local` file in the root directory:
-
+4. Configure your `.env.local`:
 ```env
 # Database
-DATABASE_URL="postgresql://username:password@localhost:5432/database_name?schema=public"
-DIRECT_URL="postgresql://username:password@localhost:5432/database_name?schema=public"
+DATABASE_URL="your-database-url"
 
-# NextAuth.js
-NEXTAUTH_SECRET="your-secret-key-here" # Generate with: openssl rand -base64 32
+# NextAuth
+NEXTAUTH_SECRET="your-secret-key"
 NEXTAUTH_URL="http://localhost:3000"
 
 # Google OAuth
@@ -74,166 +111,55 @@ GOOGLE_CLIENT_ID="your-google-client-id"
 GOOGLE_CLIENT_SECRET="your-google-client-secret"
 ```
 
-### 4. Set up Google OAuth
-
-1. Go to [Google Cloud Console](https://console.developers.google.com/apis/credentials)
-2. Create a new OAuth 2.0 Client ID (or use existing)
-3. Add authorized redirect URIs:
-   - Development: `http://localhost:3000/api/auth/callback/google`
-   - Production: `https://your-domain.com/api/auth/callback/google`
-4. Copy the Client ID and Client Secret to your `.env.local`
-
-### 5. Set up the database
-
-#### Option A: Use a local PostgreSQL database
-
-1. Install PostgreSQL if not already installed
-2. Create a new database
-3. Update the `DATABASE_URL` in `.env.local`
-
-#### Option B: Use a hosted database service
-
-Popular options:
-- [Neon](https://neon.tech) - Serverless Postgres
-- [Supabase](https://supabase.com) - Postgres with additional features
-- [Railway](https://railway.app) - Simple deployment platform
-- [PlanetScale](https://planetscale.com) - MySQL-compatible (requires changing provider in schema.prisma)
-
-### 6. Initialize Prisma and create database tables
-
+5. Run database migrations:
 ```bash
-# Generate Prisma Client
-pnpm prisma generate
-
-# Create database tables
-pnpm prisma db push
-
-# (Optional) Open Prisma Studio to view your database
-pnpm prisma studio
+pnpm prisma migrate dev
 ```
 
-### 7. Run the development server
-
+6. Start the development server:
 ```bash
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser.
+Visit `http://localhost:3000` to see the application.
 
-## Database Schema
+## 📝 Admin Access
+To access the admin panel:
+1. Sign in with your Google account
+2. Navigate to `/admin`
+3. Use the dashboard to manage content
 
-The application uses two main models:
+Admin privileges are granted through the database. Update a user's role to 'ADMIN' in the User table.
 
-- **User**: Stores authenticated user information from Google OAuth
-- **Todo**: Stores user-specific todo items with title, description, and completion status
+## 🔒 Privacy & Security
+- Secure authentication via OAuth
+- User data encryption
+- GDPR compliant
+- No personal data sharing
 
-## Project Structure
+## 🤝 Contributing
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details on:
+- Submitting question corrections
+- Reporting bugs
+- Suggesting new features
+- Adding support for new countries
 
-```
-├── app/                    # Next.js app directory
-│   ├── [locale]/          # Locale-based routing
-│   └── api/auth/          # NextAuth API routes
-├── components/
-│   ├── ui/                # shadcn/ui components
-│   ├── auth/              # Authentication components
-│   └── examples/          # Todo CRUD components
-├── lib/
-│   ├── auth/              # NextAuth configuration
-│   ├── i18n/              # Internationalization config
-│   └── prisma.ts          # Prisma client singleton
-├── server_actions/
-│   └── todos.ts           # Todo CRUD server actions
-├── prisma/
-│   └── schema.prisma      # Database schema (or lib/db/schema.prisma)
-├── messages/              # Translation files
-│   ├── en.json            # English translations
-│   ├── el.json            # Greek translations
-│   └── es.json            # Spanish translations
-└── types/                 # TypeScript definitions
-```
+## 📄 License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Available Scripts
+## ⚠️ Disclaimer
+This is an unofficial fan project. All questions and content from The 1% Club are property of their respective copyright holders. This platform is for educational and entertainment purposes only.
 
-```bash
-pnpm dev          # Start development server
-pnpm build        # Build for production
-pnpm start        # Start production server
-pnpm lint         # Run ESLint
-pnpm tsc --noEmit # Type check
+## 🙏 Acknowledgments
+- The 1% Club creators and production teams worldwide
+- All contributors who help maintain the question database
+- The open-source community for the amazing tools used in this project
 
-# Prisma commands
-pnpm prisma generate     # Generate Prisma Client
-pnpm prisma db push      # Push schema changes to database
-pnpm prisma db pull      # Pull schema from database
-pnpm prisma migrate dev  # Create and apply migrations (development)
-pnpm prisma migrate deploy # Apply migrations (production)
-pnpm prisma studio       # Open Prisma Studio GUI
-```
+## 📧 Contact
+For questions, suggestions, or issues, please:
+- Open an issue on GitHub
+- Contact us at: your-email@example.com
 
-## Deployment
+---
 
-### Database Migration
-
-For production deployments, use migrations instead of `db push`:
-
-```bash
-# Create a migration
-pnpm prisma migrate dev --name init
-
-# Deploy migrations in production
-pnpm prisma migrate deploy
-```
-
-### Environment Variables
-
-Make sure to set all required environment variables in your deployment platform:
-
-- `DATABASE_URL` - Production database connection string (pooled connection)
-- `DIRECT_URL` - Direct database connection string (non-pooled, for migrations)
-- `NEXTAUTH_SECRET` - Strong secret key (different from development)
-- `NEXTAUTH_URL` - Your production URL
-- `GOOGLE_CLIENT_ID` - Same as development or production-specific
-- `GOOGLE_CLIENT_SECRET` - Same as development or production-specific
-
-Note: For services like Supabase or PlanetScale, `DATABASE_URL` is typically the pooled connection URL, while `DIRECT_URL` is the direct connection URL used for migrations.
-
-### Deployment Platforms
-
-This app can be deployed to:
-- [Vercel](https://vercel.com) - Recommended for Next.js apps
-- [Netlify](https://netlify.com)
-- [Railway](https://railway.app)
-- Any platform supporting Node.js
-
-## Troubleshooting
-
-### Database Connection Issues
-
-If you encounter connection issues:
-
-1. Verify your `DATABASE_URL` is correct
-2. Ensure PostgreSQL is running
-3. Check firewall/network settings
-4. For SSL connections, add `?sslmode=require` to the connection string
-
-### Prisma Client Generation
-
-If TypeScript can't find Prisma types:
-
-```bash
-pnpm prisma generate
-```
-
-### Google OAuth Issues
-
-- Ensure redirect URIs match exactly (including trailing slashes)
-- Check that your Google Cloud project has the necessary APIs enabled
-- Verify client ID and secret are correct
-
-## License
-
-MIT
-
-## Contributing
-
-Pull requests are welcome! Please check existing issues before submitting new ones.
+**Ready to prove you're in the 1%?** Start playing now! 🎮

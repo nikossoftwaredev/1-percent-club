@@ -15,8 +15,8 @@ const roboto = Roboto({
 });
 
 export const metadata: Metadata = {
-  title: "App",
-  description: "",
+  title: "1% Club - The Ultimate Quiz Game",
+  description: "Test your knowledge against the nation! Can you make it to the 1% Club?",
 };
 
 export const generateStaticParams = () => {

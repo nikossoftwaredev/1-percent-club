@@ -1,40 +1,21 @@
-import { getTranslations, setRequestLocale } from "next-intl/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/auth";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { setRequestLocale } from "next-intl/server";
+import { Button } from "@/components/ui/button";
 import { ThemeSwitcher } from "@/components/examples/ThemeSwitcher";
 import { LoginButton } from "@/components/examples/login-button";
 import { LanguageSwitcher } from "@/components/examples/language-switcher";
-import { TodoList } from "@/components/examples/todo-list";
 import { BasePageProps } from "@/types/page-props";
-import {
-  Shield,
-  Database,
-  Palette,
-  Languages,
-  Sparkles,
-  Github,
-  CreditCard
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Link } from "@/lib/i18n/navigation";
+import { Trophy, Brain, Users, TrendingUp, Play } from "lucide-react";
 
 const Home = async ({ params }: BasePageProps) => {
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const t = await getTranslations("HomePage");
-  const session = await getServerSession(authOptions);
-
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-14 items-center justify-end px-4">
+        <div className="container flex h-14 items-center justify-between px-4">
+          <div className="font-bold text-xl">1% Club</div>
           <div className="flex items-center gap-2">
             <LanguageSwitcher />
             <ThemeSwitcher />
@@ -42,162 +23,86 @@ const Home = async ({ params }: BasePageProps) => {
           </div>
         </div>
       </header>
-      <main className="flex flex-col items-center gap-8 max-w-4xl w-full mx-auto p-8">
-        <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-            Next.js Full-Stack Starter
-          </h1>
-          <p className="text-muted-foreground text-lg">
-            Production-ready template with authentication, database, i18n, and more
-          </p>
-          <div className="flex justify-center gap-4">
-            <Button asChild>
-              <a
-                href="https://github.com/nikossoftwaredev/next-auth-intl-prisma-starter"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="gap-2"
-              >
-                <Github className="h-4 w-4" />
-                View on GitHub
-              </a>
-            </Button>
-            <Button variant="outline" asChild>
-              <a
-                href="https://github.com/nikossoftwaredev/next-auth-intl-prisma-starter/generate"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="gap-2"
-              >
-                <Sparkles className="h-4 w-4" />
-                Use Template
-              </a>
-            </Button>
-          </div>
-        </div>
 
-        {/* Features Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-4xl">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Shield className="h-5 w-5" />
-                NextAuth.js
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Secure authentication with Google OAuth. Easy to extend with other providers.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Database className="h-5 w-5" />
-                Prisma + Supabase
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Type-safe database with Prisma ORM connected to Supabase PostgreSQL.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Languages className="h-5 w-5" />
-                next-intl
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Internationalization support with English, Greek, and Spanish locales.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Palette className="h-5 w-5" />
-                Theme Switching
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Dark and light mode support with next-themes and system preference detection.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5" />
-                shadcn/ui
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Beautiful, accessible components built with Radix UI and Tailwind CSS.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10" />
-            <CardHeader className="relative">
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  <CreditCard className="h-5 w-5" />
-                  Stripe Payments
-                </CardTitle>
-                <span className="text-xs font-medium px-2 py-1 rounded-full bg-primary/10 text-primary">
-                  Coming Soon
+      <main className="flex-1 flex flex-col">
+        {/* Hero Section */}
+        <section className="relative flex-1 flex items-center justify-center px-4 py-20 bg-gradient-to-br from-primary/5 to-primary/10">
+          <div className="max-w-4xl mx-auto text-center space-y-8">
+            <div className="space-y-4">
+              <h1 className="text-5xl md:text-7xl font-bold">
+                <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                  1% Club
                 </span>
-              </div>
-            </CardHeader>
-            <CardContent className="relative">
-              <p className="text-sm text-muted-foreground">
-                Accept payments, manage subscriptions, and handle billing with Stripe integration.
+              </h1>
+              <p className="text-xl md:text-2xl text-muted-foreground">
+                The Ultimate Quiz Game
               </p>
-            </CardContent>
-          </Card>
+            </div>
 
-        </div>
-
-        {/* Todo Demo Section */}
-        {session?.user ? (
-          <TodoList />
-        ) : (
-          <Card className="w-full max-w-2xl">
-            <CardHeader>
-              <CardTitle>Try the Todo Demo</CardTitle>
-              <CardDescription>
-                Sign in with your Google account to see a working example of database integration.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground mb-4">
-                Once you&apos;re signed in, you&apos;ll be able to:
+            <div className="space-y-4 max-w-2xl mx-auto">
+              <p className="text-lg text-foreground/80">
+                Test your knowledge against the nation! Start with questions that 90% of people get right,
+                and work your way down to the ultra-challenging 1% questions that only the brightest minds can solve.
               </p>
-              <ul className="list-disc list-inside space-y-2 text-muted-foreground">
-                <li>Create and manage your personal todo list</li>
-                <li>Mark todos as complete</li>
-                <li>Edit and delete your todos</li>
-                <li>All your data is private and secure in Supabase</li>
-              </ul>
-              <div className="mt-6">
-                <LoginButton />
-              </div>
-            </CardContent>
-          </Card>
-        )}
+              <p className="text-lg text-foreground/80">
+                Can you make it to the elite 1% Club? Challenge yourself with questions from different countries
+                and prove you&apos;re among the smartest!
+              </p>
+            </div>
 
+            <div className="pt-8">
+              <Button size="lg" className="gap-2" asChild>
+                <Link href="/countries">
+                  <Play className="h-5 w-5" />
+                  Play Now
+                </Link>
+              </Button>
+            </div>
+
+            {/* Features Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 pt-12">
+              <div className="flex flex-col items-center space-y-2">
+                <div className="p-3 rounded-full bg-primary/10">
+                  <Brain className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="font-semibold">Challenge Your Mind</h3>
+                <p className="text-sm text-muted-foreground text-center">
+                  Questions ranging from easy to extremely difficult
+                </p>
+              </div>
+
+              <div className="flex flex-col items-center space-y-2">
+                <div className="p-3 rounded-full bg-primary/10">
+                  <Users className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="font-semibold">Compete Globally</h3>
+                <p className="text-sm text-muted-foreground text-center">
+                  Play versions from different countries
+                </p>
+              </div>
+
+              <div className="flex flex-col items-center space-y-2">
+                <div className="p-3 rounded-full bg-primary/10">
+                  <TrendingUp className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="font-semibold">Track Progress</h3>
+                <p className="text-sm text-muted-foreground text-center">
+                  Monitor your performance and improvement
+                </p>
+              </div>
+
+              <div className="flex flex-col items-center space-y-2">
+                <div className="p-3 rounded-full bg-primary/10">
+                  <Trophy className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="font-semibold">Join the Elite</h3>
+                <p className="text-sm text-muted-foreground text-center">
+                  Prove you belong in the 1% Club
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
     </div>
   );
