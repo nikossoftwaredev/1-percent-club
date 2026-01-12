@@ -1,0 +1,13 @@
+{
+  "HomePage": {
+    "title": "Bienvenido",
+    "description": "Comienza editando esta página.",
+    "components": {
+      "title": "Componentes Disponibles",
+      "button": "Botón",
+      "input": "Entrada",
+      "card": "Tarjeta",
+      "label": "Etiqueta"
+    }
+  }
+}
