@@ -40,7 +40,7 @@ model Country {
   code        String   @unique // e.g., "GB", "US", "AU", "NL", "FR", "DE", "ES"
   name        String   @unique // e.g., "United Kingdom", "United States"
   slug        String   @unique // URL-friendly version e.g., "united-kingdom", "australia"
-  flagEmoji   String?  // e.g., "🇬🇧", "🇺🇸"
+  flagImage   String?  @map("flag_image") // URL to uploaded flag image
   seoTitle    String?  @map("seo_title") @db.Text // SEO title for country page
   seoDescription String? @map("seo_description") @db.Text // SEO description for country page
   isActive    Boolean  @default(true)
@@ -58,10 +58,8 @@ model Country {
 model Season {
   id          String   @id @default(cuid())
   number      Int      // Season 1, 2, 3, etc.
-  title       String?  // Season title for display
   year        Int?     // Year the season aired
-  description String?  @db.Text
-  imageUrl    String?  @map("image_url") // Image for season card display
+  isFinished  Boolean  @default(true) @map("is_finished") // Is the season finished airing
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
@@ -128,8 +126,11 @@ enum DifficultyLevel {
   SEVENTY     @map("70")
   SIXTY       @map("60")
   FIFTY       @map("50")
+  FORTYFIVE   @map("45")
   FORTY       @map("40")
+  THIRTYFIVE  @map("35")
   THIRTY      @map("30")
+  TWENTYFIVE  @map("25")
   TWENTY      @map("20")
   FIFTEEN     @map("15")
   TEN         @map("10")

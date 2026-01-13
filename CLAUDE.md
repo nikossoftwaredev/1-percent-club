@@ -202,6 +202,27 @@ After completing work on any file:
    - Production: `https://your-domain.com/api/auth/callback/google`
 4. Copy Client ID and Client Secret to `.env.local`
 
+### Prisma & Database
+
+- **ALWAYS use Prisma generated types** when working with data from the database
+- Import types from `@prisma/client` for database models
+- For server actions returning DB data, use Prisma's generated types or extend them
+- Never manually define interfaces that duplicate Prisma model shapes
+
+```typescript
+// ✅ GOOD - Use Prisma generated types
+import { Question, Answer } from "@prisma/client";
+
+type QuestionWithAnswers = Question & { answers: Answer[] };
+
+// ❌ BAD - Manually redefining what Prisma already generates
+interface Question {
+  id: string;
+  questionText: string;
+  // ... duplicating Prisma's generated type
+}
+```
+
 ## Important Notes
 
 - **PNPM Required**: This project uses PNPM workspaces
