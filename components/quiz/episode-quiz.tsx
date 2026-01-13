@@ -6,49 +6,15 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
+import { DifficultyLevel } from "@/lib/db";
+import { getDifficultyLabel, getDifficultyColor } from "@/lib/quiz/difficulty";
 import { EpisodeForQuiz } from "@/server-actions/episodes";
+
+const DEFAULT_TIME = 30;
 
 interface EpisodeQuizProps {
   episode: EpisodeForQuiz;
 }
-
-const difficultyColors: Record<string, string> = {
-  NINETY: "bg-green-500",
-  EIGHTY: "bg-green-400",
-  SEVENTY: "bg-lime-500",
-  SIXTY: "bg-yellow-500",
-  FIFTY: "bg-amber-500",
-  FORTYFIVE: "bg-orange-400",
-  FORTY: "bg-orange-500",
-  THIRTYFIVE: "bg-red-400",
-  THIRTY: "bg-red-500",
-  TWENTYFIVE: "bg-rose-500",
-  TWENTY: "bg-pink-500",
-  FIFTEEN: "bg-fuchsia-500",
-  TEN: "bg-purple-500",
-  FIVE: "bg-violet-500",
-  ONE: "bg-indigo-500",
-};
-
-const difficultyLabels: Record<string, string> = {
-  NINETY: "90%",
-  EIGHTY: "80%",
-  SEVENTY: "70%",
-  SIXTY: "60%",
-  FIFTY: "50%",
-  FORTYFIVE: "45%",
-  FORTY: "40%",
-  THIRTYFIVE: "35%",
-  THIRTY: "30%",
-  TWENTYFIVE: "25%",
-  TWENTY: "20%",
-  FIFTEEN: "15%",
-  TEN: "10%",
-  FIVE: "5%",
-  ONE: "1%",
-};
-
-const DEFAULT_TIME = 30;
 
 export const EpisodeQuiz = ({ episode }: EpisodeQuizProps) => {
   const router = useRouter();
@@ -135,9 +101,6 @@ export const EpisodeQuiz = ({ episode }: EpisodeQuizProps) => {
     router.push(`/countries/${episode.season.country.slug}/seasons/${episode.season.number}/episodes`);
   };
 
-  const getDifficultyLabel = (difficulty: string) =>
-    difficultyLabels[difficulty] || difficulty;
-
   const getAnswerButtonStyle = (index: number, isCorrect: boolean): string => {
     const isSelected = selectedAnswer === index;
 
@@ -151,6 +114,12 @@ export const EpisodeQuiz = ({ episode }: EpisodeQuizProps) => {
     if (showExplanation && isCorrect) return "border-green-500 bg-green-500/10";
 
     return "border-border hover:border-primary/50";
+  };
+
+  const getTextInputStyle = (): string => {
+    if (!showExplanation) return "";
+    if (isTextAnswerCorrect) return "border-green-500 bg-green-500/10";
+    return "border-red-500 bg-red-500/10";
   };
 
   const canSubmit = isTextInputQuestion ? textAnswer.trim().length > 0 : selectedAnswer !== null;
@@ -225,8 +194,8 @@ export const EpisodeQuiz = ({ episode }: EpisodeQuizProps) => {
       <Card className="p-6 mb-6">
         {/* Difficulty Badge & Timer */}
         <div className="flex justify-between items-center mb-6">
-          <span className={`px-3 py-1 rounded-full text-white font-semibold ${difficultyColors[currentQuestion.difficulty] || "bg-gray-500"}`}>
-            {getDifficultyLabel(currentQuestion.difficulty)} of people got this right
+          <span className={`px-3 py-1 rounded-full text-white font-semibold ${getDifficultyColor(currentQuestion.difficulty as DifficultyLevel)}`}>
+            {getDifficultyLabel(currentQuestion.difficulty as DifficultyLevel)} of people got this right
           </span>
           <div className="flex items-center gap-2">
             <svg className="w-5 h-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -263,13 +232,7 @@ export const EpisodeQuiz = ({ episode }: EpisodeQuizProps) => {
               onChange={(e) => setTextAnswer(e.target.value)}
               placeholder="Type your answer..."
               disabled={showExplanation}
-              className={`text-lg py-6 ${
-                showExplanation
-                  ? isTextAnswerCorrect
-                    ? "border-green-500 bg-green-500/10"
-                    : "border-red-500 bg-red-500/10"
-                  : ""
-              }`}
+              className={`text-lg py-6 ${getTextInputStyle()}`}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && canSubmit && !showExplanation) {
                   handleSubmitAnswer();

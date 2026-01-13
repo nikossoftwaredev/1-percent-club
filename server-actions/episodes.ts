@@ -13,32 +13,6 @@ export interface EpisodeWithQuestionCount {
   };
 }
 
-export const getEpisodes = async (seasonId: string): Promise<EpisodeWithQuestionCount[]> => {
-  const episodes = await prisma.episode.findMany({
-    where: { seasonId },
-    include: {
-      _count: {
-        select: { questions: true },
-      },
-    },
-    orderBy: { number: "asc" },
-  });
-
-  return episodes;
-};
-
-export const getSeasonWithCountry = async (seasonId: string) => {
-  const season = await prisma.season.findUnique({
-    where: { id: seasonId },
-    include: {
-      country: true,
-    },
-  });
-
-  return season;
-};
-
-// Public: Get episode with questions for quiz
 export interface QuizQuestion {
   id: string;
   questionText: string;
@@ -70,12 +44,32 @@ export interface EpisodeForQuiz {
   questions: QuizQuestion[];
 }
 
+export const getEpisodes = async (seasonId: string): Promise<EpisodeWithQuestionCount[]> => {
+  return prisma.episode.findMany({
+    where: { seasonId },
+    include: {
+      _count: {
+        select: { questions: true },
+      },
+    },
+    orderBy: { number: "asc" },
+  });
+};
+
+export const getSeasonWithCountry = async (seasonId: string) => {
+  return prisma.season.findUnique({
+    where: { id: seasonId },
+    include: {
+      country: true,
+    },
+  });
+};
+
 export const getEpisodeForQuiz = async (
   countrySlug: string,
   seasonNumber: number,
   episodeNumber: number
 ): Promise<EpisodeForQuiz | null> => {
-  // First find the country
   const country = await prisma.country.findUnique({
     where: { slug: countrySlug },
     select: { id: true },
@@ -83,7 +77,6 @@ export const getEpisodeForQuiz = async (
 
   if (!country) return null;
 
-  // Find the season
   const season = await prisma.season.findFirst({
     where: {
       countryId: country.id,
@@ -94,8 +87,7 @@ export const getEpisodeForQuiz = async (
 
   if (!season) return null;
 
-  // Find the episode with questions
-  const episode = await prisma.episode.findFirst({
+  return prisma.episode.findFirst({
     where: {
       seasonId: season.id,
       number: episodeNumber,
@@ -115,7 +107,7 @@ export const getEpisodeForQuiz = async (
       questions: {
         where: {
           isActive: true,
-          questionText: { not: "" }, // Only include filled questions
+          questionText: { not: "" },
         },
         include: {
           answers: {
@@ -126,6 +118,4 @@ export const getEpisodeForQuiz = async (
       },
     },
   });
-
-  return episode;
 };

@@ -27,71 +27,17 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { cn } from "@/lib/general/utils";
+import { DifficultyLevel } from "@/lib/db";
+import {
+  DIFFICULTY_LABELS,
+  DIFFICULTY_COLORS,
+  DIFFICULTY_ORDER,
+  ANSWER_LETTERS,
+} from "@/lib/quiz/difficulty";
 import { QuestionWithAnswers, updateQuestion } from "@/server-actions/questions";
-
-type DifficultyLevel =
-  | "NINETY"
-  | "EIGHTY"
-  | "SEVENTY"
-  | "SIXTY"
-  | "FIFTY"
-  | "FORTYFIVE"
-  | "FORTY"
-  | "THIRTYFIVE"
-  | "THIRTY"
-  | "TWENTYFIVE"
-  | "TWENTY"
-  | "FIFTEEN"
-  | "TEN"
-  | "FIVE"
-  | "ONE";
 
 type AnswerType = "select" | "text";
 type AnswerContentType = "text" | "image";
-
-const difficultyLabels: Record<DifficultyLevel, string> = {
-  NINETY: "90%",
-  EIGHTY: "80%",
-  SEVENTY: "70%",
-  SIXTY: "60%",
-  FIFTY: "50%",
-  FORTYFIVE: "45%",
-  FORTY: "40%",
-  THIRTYFIVE: "35%",
-  THIRTY: "30%",
-  TWENTYFIVE: "25%",
-  TWENTY: "20%",
-  FIFTEEN: "15%",
-  TEN: "10%",
-  FIVE: "5%",
-  ONE: "1%",
-};
-
-const difficultyColors: Record<DifficultyLevel, string> = {
-  NINETY: "bg-green-500",
-  EIGHTY: "bg-green-400",
-  SEVENTY: "bg-lime-500",
-  SIXTY: "bg-yellow-500",
-  FIFTY: "bg-amber-500",
-  FORTYFIVE: "bg-orange-400",
-  FORTY: "bg-orange-500",
-  THIRTYFIVE: "bg-red-400",
-  THIRTY: "bg-red-500",
-  TWENTYFIVE: "bg-rose-500",
-  TWENTY: "bg-pink-500",
-  FIFTEEN: "bg-fuchsia-500",
-  TEN: "bg-purple-500",
-  FIVE: "bg-violet-500",
-  ONE: "bg-indigo-500",
-};
-
-const difficultyOrder: DifficultyLevel[] = [
-  "NINETY", "EIGHTY", "SEVENTY", "SIXTY", "FIFTY", "FORTYFIVE",
-  "FORTY", "THIRTYFIVE", "THIRTY", "TWENTYFIVE", "TWENTY",
-  "FIFTEEN", "TEN", "FIVE", "ONE",
-];
-
-const answerLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
 
 interface AnswerFormItem {
   text: string;
@@ -214,19 +160,25 @@ export const QuestionsManager = ({
     });
   };
 
+  const buildAnswers = () => {
+    if (formData.answerType === "select") {
+      return formData.answers.map((a, i) => ({
+        answerText: formData.answerContentType === "text" ? a.text : "",
+        answerImage: formData.answerContentType === "image" ? a.image : null,
+        isCorrect: a.isCorrect,
+        orderIndex: i,
+      }));
+    }
+    if (formData.correctTextAnswer) {
+      return [{ answerText: formData.correctTextAnswer, answerImage: null, isCorrect: true, orderIndex: 0 }];
+    }
+    return [];
+  };
+
   const handleSave = () => {
     if (!selectedQuestion) return;
     startTransition(async () => {
-      const answers = formData.answerType === "select"
-        ? formData.answers.map((a, i) => ({
-            answerText: formData.answerContentType === "text" ? a.text : "",
-            answerImage: formData.answerContentType === "image" ? a.image : null,
-            isCorrect: a.isCorrect,
-            orderIndex: i,
-          }))
-        : formData.correctTextAnswer
-          ? [{ answerText: formData.correctTextAnswer, answerImage: null, isCorrect: true, orderIndex: 0 }]
-          : [];
+      const answers = buildAnswers();
 
       await updateQuestion(
         {
@@ -297,8 +249,8 @@ export const QuestionsManager = ({
   };
 
   const sortedQuestions = [...questions].sort((a, b) => {
-    const aIndex = difficultyOrder.indexOf(a.difficulty as DifficultyLevel);
-    const bIndex = difficultyOrder.indexOf(b.difficulty as DifficultyLevel);
+    const aIndex = DIFFICULTY_ORDER.indexOf(a.difficulty as DifficultyLevel);
+    const bIndex = DIFFICULTY_ORDER.indexOf(b.difficulty as DifficultyLevel);
     return aIndex - bIndex;
   });
 
@@ -336,10 +288,10 @@ export const QuestionsManager = ({
                       <Badge
                         className={cn(
                           "text-white font-medium",
-                          difficultyColors[difficulty]
+                          DIFFICULTY_COLORS[difficulty]
                         )}
                       >
-                        {difficultyLabels[difficulty]}
+                        {DIFFICULTY_LABELS[difficulty]}
                       </Badge>
                     </TableCell>
                     <TableCell
@@ -392,10 +344,10 @@ export const QuestionsManager = ({
                 <Badge
                   className={cn(
                     "text-white font-medium",
-                    difficultyColors[selectedQuestion.difficulty as DifficultyLevel]
+                    DIFFICULTY_COLORS[selectedQuestion.difficulty as DifficultyLevel]
                   )}
                 >
-                  {difficultyLabels[selectedQuestion.difficulty as DifficultyLevel]}
+                  {DIFFICULTY_LABELS[selectedQuestion.difficulty as DifficultyLevel]}
                 </Badge>
               )}
             </DialogTitle>
@@ -517,13 +469,13 @@ export const QuestionsManager = ({
                           htmlFor={`answer-${index}`}
                           className="font-medium w-6 shrink-0"
                         >
-                          {answerLetters[index]}
+                          {ANSWER_LETTERS[index]}
                         </Label>
                         {formData.answerContentType === "text" ? (
                           <Input
                             value={answer.text}
                             onChange={(e) => handleAnswerTextChange(index, e.target.value)}
-                            placeholder={`Answer ${answerLetters[index]} text`}
+                            placeholder={`Answer ${ANSWER_LETTERS[index]} text`}
                             className="flex-1"
                             disabled={isPending}
                           />

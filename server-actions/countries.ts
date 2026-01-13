@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
+import type { SeasonWithEpisodeCount } from "./seasons";
 
 export interface CountryWithSeasonCount {
   id: string;
@@ -15,8 +16,32 @@ export interface CountryWithSeasonCount {
   };
 }
 
+export interface CountryWithSeasons {
+  id: string;
+  name: string;
+  code: string;
+  slug: string;
+  flagImage: string | null;
+  isActive: boolean;
+  seasons: SeasonWithEpisodeCount[];
+}
+
+interface CreateCountryInput {
+  name: string;
+  code: string;
+  flagImage?: string;
+}
+
+interface UpdateCountryInput {
+  id: string;
+  name?: string;
+  code?: string;
+  flagImage?: string;
+  isActive?: boolean;
+}
+
 export const getCountries = async (): Promise<CountryWithSeasonCount[]> => {
-  const countries = await prisma.country.findMany({
+  return prisma.country.findMany({
     include: {
       _count: {
         select: { seasons: true },
@@ -24,12 +49,10 @@ export const getCountries = async (): Promise<CountryWithSeasonCount[]> => {
     },
     orderBy: { name: "asc" },
   });
-
-  return countries;
 };
 
 export const getCountryById = async (id: string) => {
-  const country = await prisma.country.findUnique({
+  return prisma.country.findUnique({
     where: { id },
     include: {
       _count: {
@@ -37,15 +60,23 @@ export const getCountryById = async (id: string) => {
       },
     },
   });
-
-  return country;
 };
 
-interface CreateCountryInput {
-  name: string;
-  code: string;
-  flagImage?: string;
-}
+export const getCountryBySlug = async (slug: string): Promise<CountryWithSeasons | null> => {
+  return prisma.country.findUnique({
+    where: { slug },
+    include: {
+      seasons: {
+        include: {
+          _count: {
+            select: { episodes: true },
+          },
+        },
+        orderBy: { number: "asc" },
+      },
+    },
+  });
+};
 
 export const createCountry = async (input: CreateCountryInput) => {
   const slug = input.name.toLowerCase().replace(/\s+/g, "-");
@@ -63,25 +94,12 @@ export const createCountry = async (input: CreateCountryInput) => {
   return country;
 };
 
-interface UpdateCountryInput {
-  id: string;
-  name?: string;
-  code?: string;
-  flagImage?: string;
-  isActive?: boolean;
-}
-
 export const updateCountry = async (input: UpdateCountryInput) => {
   const { id, ...data } = input;
 
-  // If name is being updated, update the slug too
   const updateData: Record<string, unknown> = { ...data };
-  if (data.name) {
-    updateData.slug = data.name.toLowerCase().replace(/\s+/g, "-");
-  }
-  if (data.code) {
-    updateData.code = data.code.toUpperCase();
-  }
+  if (data.name) updateData.slug = data.name.toLowerCase().replace(/\s+/g, "-");
+  if (data.code) updateData.code = data.code.toUpperCase();
 
   const country = await prisma.country.update({
     where: { id },
@@ -98,44 +116,4 @@ export const deleteCountry = async (id: string) => {
   });
 
   revalidatePath("/admin/countries");
-};
-
-// Public: Get country by slug with seasons and episode counts
-export interface SeasonWithEpisodeCount {
-  id: string;
-  number: number;
-  year: number | null;
-  isFinished: boolean;
-  isActive: boolean;
-  _count: {
-    episodes: number;
-  };
-}
-
-export interface CountryWithSeasons {
-  id: string;
-  name: string;
-  code: string;
-  slug: string;
-  flagImage: string | null;
-  isActive: boolean;
-  seasons: SeasonWithEpisodeCount[];
-}
-
-export const getCountryBySlug = async (slug: string): Promise<CountryWithSeasons | null> => {
-  const country = await prisma.country.findUnique({
-    where: { slug },
-    include: {
-      seasons: {
-        include: {
-          _count: {
-            select: { episodes: true },
-          },
-        },
-        orderBy: { number: "asc" },
-      },
-    },
-  });
-
-  return country;
 };

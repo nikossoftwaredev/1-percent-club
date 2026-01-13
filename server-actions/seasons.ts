@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
+import { DIFFICULTY_ORDER } from "@/lib/quiz/difficulty";
 
 export interface SeasonWithEpisodeCount {
   id: string;
@@ -14,8 +15,22 @@ export interface SeasonWithEpisodeCount {
   };
 }
 
+interface CreateSeasonInput {
+  countryId: string;
+  year?: number;
+  isFinished?: boolean;
+  episodeCount?: number;
+}
+
+interface UpdateSeasonInput {
+  id: string;
+  countryId: string;
+  year?: number | null;
+  isFinished?: boolean;
+}
+
 export const getSeasons = async (countryId: string): Promise<SeasonWithEpisodeCount[]> => {
-  const seasons = await prisma.season.findMany({
+  return prisma.season.findMany({
     where: { countryId },
     include: {
       _count: {
@@ -24,8 +39,6 @@ export const getSeasons = async (countryId: string): Promise<SeasonWithEpisodeCo
     },
     orderBy: { number: "asc" },
   });
-
-  return seasons;
 };
 
 export const getNextSeasonNumber = async (countryId: string): Promise<number> => {
@@ -37,32 +50,6 @@ export const getNextSeasonNumber = async (countryId: string): Promise<number> =>
 
   return (lastSeason?.number ?? 0) + 1;
 };
-
-// Standard 15-question difficulty levels for 1% Club
-const DIFFICULTY_ORDER = [
-  "NINETY",
-  "EIGHTY",
-  "SEVENTY",
-  "SIXTY",
-  "FIFTY",
-  "FORTYFIVE",
-  "FORTY",
-  "THIRTYFIVE",
-  "THIRTY",
-  "TWENTYFIVE",
-  "TWENTY",
-  "FIFTEEN",
-  "TEN",
-  "FIVE",
-  "ONE",
-] as const;
-
-interface CreateSeasonInput {
-  countryId: string;
-  year?: number;
-  isFinished?: boolean;
-  episodeCount?: number; // Number of episodes to pre-create
-}
 
 export const createSeason = async (input: CreateSeasonInput) => {
   const nextNumber = await getNextSeasonNumber(input.countryId);
@@ -118,13 +105,6 @@ export const createSeason = async (input: CreateSeasonInput) => {
   revalidatePath(`/admin/countries/${input.countryId}/seasons`);
   return season;
 };
-
-interface UpdateSeasonInput {
-  id: string;
-  countryId: string;
-  year?: number | null;
-  isFinished?: boolean;
-}
 
 export const updateSeason = async (input: UpdateSeasonInput) => {
   const { id, countryId, ...data } = input;

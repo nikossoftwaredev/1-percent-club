@@ -20,35 +20,6 @@ export interface QuestionWithAnswers {
   }[];
 }
 
-export const getQuestions = async (episodeId: string): Promise<QuestionWithAnswers[]> => {
-  const questions = await prisma.question.findMany({
-    where: { episodeId },
-    include: {
-      answers: {
-        orderBy: { orderIndex: "asc" },
-      },
-    },
-    orderBy: { orderInShow: "asc" },
-  });
-
-  return questions;
-};
-
-export const getEpisodeWithSeasonAndCountry = async (episodeId: string) => {
-  const episode = await prisma.episode.findUnique({
-    where: { id: episodeId },
-    include: {
-      season: {
-        include: {
-          country: true,
-        },
-      },
-    },
-  });
-
-  return episode;
-};
-
 interface UpdateQuestionInput {
   id: string;
   questionText: string;
@@ -63,6 +34,31 @@ interface UpdateQuestionInput {
   }[];
 }
 
+export const getQuestions = async (episodeId: string): Promise<QuestionWithAnswers[]> => {
+  return prisma.question.findMany({
+    where: { episodeId },
+    include: {
+      answers: {
+        orderBy: { orderIndex: "asc" },
+      },
+    },
+    orderBy: { orderInShow: "asc" },
+  });
+};
+
+export const getEpisodeWithSeasonAndCountry = async (episodeId: string) => {
+  return prisma.episode.findUnique({
+    where: { id: episodeId },
+    include: {
+      season: {
+        include: {
+          country: true,
+        },
+      },
+    },
+  });
+};
+
 export const updateQuestion = async (
   input: UpdateQuestionInput,
   episodeId: string,
@@ -71,15 +67,12 @@ export const updateQuestion = async (
 ) => {
   const { id, answers, ...data } = input;
 
-  // Update question and answers in a transaction
   const question = await prisma.$transaction(async (tx) => {
-    // Update the question
     const updatedQuestion = await tx.question.update({
       where: { id },
       data,
     });
 
-    // Delete existing answers and create new ones if provided
     if (answers && answers.length > 0) {
       await tx.answer.deleteMany({
         where: { questionId: id },
