@@ -2,11 +2,13 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
+import { QuestionLayout } from "@prisma/client";
 
 export interface QuestionWithAnswers {
   id: string;
   questionText: string;
   questionImage: string | null;
+  layout: string;
   difficulty: string;
   explanation: string;
   orderInShow: number | null;
@@ -24,6 +26,7 @@ interface UpdateQuestionInput {
   id: string;
   questionText: string;
   questionImage?: string | null;
+  layout?: QuestionLayout;
   explanation: string;
   answers?: {
     id?: string;
@@ -52,7 +55,14 @@ export const getEpisodeWithSeasonAndCountry = async (episodeId: string) => {
     include: {
       season: {
         include: {
-          country: true,
+          country: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              flagImage: true,
+            },
+          },
         },
       },
     },

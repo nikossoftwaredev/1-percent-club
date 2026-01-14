@@ -1,4 +1,21 @@
-import { DifficultyLevel } from "@/lib/db";
+// Using string literal types to match Prisma enum values
+// This avoids importing database types in client components
+type DifficultyLevel =
+  | "NINETY"
+  | "EIGHTY"
+  | "SEVENTY"
+  | "SIXTY"
+  | "FIFTY"
+  | "FORTYFIVE"
+  | "FORTY"
+  | "THIRTYFIVE"
+  | "THIRTY"
+  | "TWENTYFIVE"
+  | "TWENTY"
+  | "FIFTEEN"
+  | "TEN"
+  | "FIVE"
+  | "ONE";
 
 export const DIFFICULTY_LABELS: Record<DifficultyLevel, string> = {
   NINETY: "90%",
@@ -57,8 +74,8 @@ export const DIFFICULTY_ORDER: DifficultyLevel[] = [
 
 export const ANSWER_LETTERS = ["A", "B", "C", "D", "E", "F", "G", "H"];
 
-export const getDifficultyLabel = (difficulty: DifficultyLevel): string =>
-  DIFFICULTY_LABELS[difficulty] ?? difficulty;
+export const getDifficultyLabel = (difficulty: string): string =>
+  DIFFICULTY_LABELS[difficulty as DifficultyLevel] ?? difficulty;
 
-export const getDifficultyColor = (difficulty: DifficultyLevel): string =>
-  DIFFICULTY_COLORS[difficulty] ?? "bg-gray-500";
+export const getDifficultyColor = (difficulty: string): string =>
+  DIFFICULTY_COLORS[difficulty as DifficultyLevel] ?? "bg-gray-500";

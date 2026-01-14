@@ -205,14 +205,23 @@ After completing work on any file:
 ### Prisma & Database
 
 - **ALWAYS use Prisma generated types** when working with data from the database
-- Import types from `@prisma/client` for database models
+- **CRITICAL**: In client components (`"use client"`), import Prisma types as **type-only imports** to avoid runtime errors
+- In server components, import normally from `@prisma/client` or `@/lib/db`
 - For server actions returning DB data, use Prisma's generated types or extend them
 - Never manually define interfaces that duplicate Prisma model shapes
+- Never create separate type files for enums that Prisma already generates
 
 ```typescript
-// ✅ GOOD - Use Prisma generated types
-import { Question, Answer } from "@prisma/client";
+// ✅ GOOD - Client component using type-only imports
+"use client";
+import type { Question, Answer, DifficultyLevel } from "@prisma/client";
 
+// ✅ GOOD - Server component using normal imports
+import { Question, Answer } from "@prisma/client";
+// or
+import { DifficultyLevel, QuestionLayout } from "@/lib/db";
+
+// ✅ GOOD - Use Prisma generated types
 type QuestionWithAnswers = Question & { answers: Answer[] };
 
 // ❌ BAD - Manually redefining what Prisma already generates
@@ -221,7 +230,18 @@ interface Question {
   questionText: string;
   // ... duplicating Prisma's generated type
 }
+
+// ❌ BAD - Creating separate enum files when Prisma already has them
+export enum DifficultyLevel {
+  NINETY = "90",
+  // ... duplicating Prisma's enum
+}
 ```
+
+**Important Notes:**
+- Client components cannot import from `@/lib/db` directly as it uses Node.js globals
+- When using enum values in client components, use string literals: `"VERTICAL"` instead of `QuestionLayout.VERTICAL`
+- Type cast when needed: `"VERTICAL" as QuestionLayout` for type safety
 
 ## Important Notes
 

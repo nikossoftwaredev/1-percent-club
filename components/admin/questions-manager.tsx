@@ -27,7 +27,7 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { cn } from "@/lib/general/utils";
-import { DifficultyLevel } from "@/lib/db";
+import type { DifficultyLevel, QuestionLayout } from "@prisma/client";
 import {
   DIFFICULTY_LABELS,
   DIFFICULTY_COLORS,
@@ -35,6 +35,7 @@ import {
   ANSWER_LETTERS,
 } from "@/lib/quiz/difficulty";
 import { QuestionWithAnswers, updateQuestion } from "@/server-actions/questions";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 type AnswerType = "select" | "text";
 type AnswerContentType = "text" | "image";
@@ -48,6 +49,7 @@ interface AnswerFormItem {
 interface QuestionFormData {
   questionText: string;
   questionImage: string;
+  layout: QuestionLayout;
   explanation: string;
   answerType: AnswerType;
   answerContentType: AnswerContentType;
@@ -55,20 +57,22 @@ interface QuestionFormData {
   correctTextAnswer: string; // For text input type questions
 }
 
-const createEmptyAnswers = (count: number = 4): AnswerFormItem[] =>
-  Array.from({ length: count }, () => ({
+const createEmptyAnswers = (count: number = 4): AnswerFormItem[] => {
+  return Array.from({ length: count }, () => ({
     text: "",
     image: "",
     isCorrect: false,
   }));
+};
 
 const initialFormData: QuestionFormData = {
   questionText: "",
   questionImage: "",
+  layout: "VERTICAL" as QuestionLayout,
   explanation: "",
-  answerType: "select",
+  answerType: "text",
   answerContentType: "text",
-  answers: createEmptyAnswers(4),
+  answers: [],
   correctTextAnswer: "",
 };
 
@@ -170,7 +174,12 @@ export const QuestionsManager = ({
       }));
     }
     if (formData.correctTextAnswer) {
-      return [{ answerText: formData.correctTextAnswer, answerImage: null, isCorrect: true, orderIndex: 0 }];
+      return [{
+        answerText: formData.correctTextAnswer,
+        answerImage: null,
+        isCorrect: true,
+        orderIndex: 0
+      }];
     }
     return [];
   };
@@ -185,6 +194,7 @@ export const QuestionsManager = ({
           id: selectedQuestion.id,
           questionText: formData.questionText,
           questionImage: formData.questionImage || null,
+          layout: formData.layout,
           explanation: formData.explanation,
           answers,
         },
@@ -227,6 +237,7 @@ export const QuestionsManager = ({
     setFormData({
       questionText: question.questionText,
       questionImage: question.questionImage || "",
+      layout: (question.layout || "VERTICAL") as QuestionLayout,
       explanation: question.explanation,
       answerType: isTextInputType ? "text" : "select",
       answerContentType,
@@ -379,6 +390,30 @@ export const QuestionsManager = ({
                 disabled={isPending}
               />
             </div>
+
+            {/* Layout */}
+            {formData.questionImage && (
+              <div className="grid gap-2">
+                <Label>Layout</Label>
+                <Select
+                  value={formData.layout}
+                  onValueChange={(value) => handleFormChange("layout", value as QuestionLayout)}
+                  disabled={isPending}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="VERTICAL">
+                      Vertical - Question text above image(s)
+                    </SelectItem>
+                    <SelectItem value="HORIZONTAL">
+                      Horizontal - Question text beside image(s)
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
             {/* Answer Type */}
             <div className="grid gap-2">

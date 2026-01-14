@@ -1,16 +1,66 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "@/lib/i18n/navigation";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { DifficultyLevel } from "@/lib/db";
-import { getDifficultyLabel, getDifficultyColor } from "@/lib/quiz/difficulty";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/general/utils";
+import { useRouter } from "@/lib/i18n/navigation";
+import { getDifficultyLabel } from "@/lib/quiz/difficulty";
 import { EpisodeForQuiz } from "@/server-actions/episodes";
 
 const DEFAULT_TIME = 30;
+const ANSWER_LETTERS = ["A", "B", "C", "D", "E", "F", "G", "H"];
+
+// Common styles
+const BACKGROUND_STYLES = {
+  backgroundImage: `url('/background.jpg')`,
+  backgroundPosition: "center",
+  backgroundSize: "cover",
+};
+
+const GOLDEN_BUTTON_STYLES =
+  "bg-linear-to-r from-yellow-400 to-orange-500 text-black font-bold hover:from-yellow-500 hover:to-orange-600";
+
+const OUTLINE_BUTTON_STYLES =
+  "border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/10";
+
+// Helper functions
+const getAnswerButtonClasses = (
+  isSelected: boolean,
+  isCorrect: boolean,
+  showExplanation: boolean,
+  selectedAnswer: number | null,
+  index: number,
+) => {
+  if (!showExplanation) {
+    if (isSelected) return "bg-linear-to-r from-yellow-500/20 to-orange-500/20";
+    return "bg-card";
+  }
+
+  if (isCorrect) return "bg-linear-to-r from-green-500/20 to-green-600/20";
+
+  if (selectedAnswer === index && !isCorrect) return "bg-linear-to-r from-red-500/20 to-red-600/20";
+
+  return "bg-card";
+};
+
+const getLetterBadgeClasses = (
+  isCorrect: boolean,
+  isSelectedIncorrect: boolean,
+  showExplanation: boolean,
+) => {
+  const baseClasses =
+    "w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg shrink-0 bg-gradient-to-br text-black";
+
+  if (!showExplanation) return cn(baseClasses, "from-yellow-400 to-orange-500");
+  if (isCorrect) return cn(baseClasses, "from-green-400 to-green-600");
+  if (isSelectedIncorrect) return cn(baseClasses, "from-red-400 to-red-600");
+  return cn(baseClasses, "from-yellow-400 to-orange-500");
+};
 
 interface EpisodeQuizProps {
   episode: EpisodeForQuiz;
@@ -18,46 +68,73 @@ interface EpisodeQuizProps {
 
 export const EpisodeQuiz = ({ episode }: EpisodeQuizProps) => {
   const router = useRouter();
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const searchParams = useSearchParams();
+
+  // Initialize question index from URL parameter or default to 0
+  const initialQuestionIndex = (() => {
+    const questionParam = searchParams.get('question');
+    if (questionParam) {
+      const questionNum = parseInt(questionParam, 10);
+      if (!isNaN(questionNum) && questionNum > 0 && questionNum <= episode.questions.length) {
+        return questionNum - 1; // Convert to 0-based index
+      }
+    }
+    return 0;
+  })();
+
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(initialQuestionIndex);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [textAnswer, setTextAnswer] = useState("");
   const [showExplanation, setShowExplanation] = useState(false);
   const [score, setScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(DEFAULT_TIME);
   const [isQuizComplete, setIsQuizComplete] = useState(false);
-  const [isTextAnswerCorrect, setIsTextAnswerCorrect] = useState<boolean | null>(null);
+  const [isTextAnswerCorrect, setIsTextAnswerCorrect] = useState<
+    boolean | null
+  >(null);
 
   const questions = episode.questions;
   const currentQuestion = questions[currentQuestionIndex];
   const totalQuestions = questions.length;
-  const progress = totalQuestions > 0 ? ((currentQuestionIndex + 1) / totalQuestions) * 100 : 0;
+
+  // Get difficulty percentage
+  const difficultyPercentage = currentQuestion
+    ? parseInt(
+        getDifficultyLabel(
+          currentQuestion.difficulty,
+        ).replace("%", ""),
+      )
+    : 50;
 
   // Determine if question is text input type (single answer = text input)
   const isTextInputQuestion = currentQuestion?.answers.length === 1;
 
-  const handleTimeUp = useCallback(() => {
-    setShowExplanation(true);
-    if (isTextInputQuestion) {
-      setIsTextAnswerCorrect(false);
-    }
-  }, [isTextInputQuestion]);
+  // Calculate timer progress (percentage of time remaining)
+  const timerProgress = (timeLeft / DEFAULT_TIME) * 100;
 
-  // Timer effect
+  // Update URL when question changes
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('question', String(currentQuestionIndex + 1));
+    window.history.replaceState({}, '', url.toString());
+  }, [currentQuestionIndex]);
+
+  // Timer effect - just for visual effect, no actions when it ends
   useEffect(() => {
     if (showExplanation || isQuizComplete || totalQuestions === 0) return;
 
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
-          handleTimeUp();
-          return DEFAULT_TIME;
+          // Timer ends but nothing happens - just visual effect
+          return 0;
         }
         return prev - 1;
       });
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [currentQuestionIndex, showExplanation, isQuizComplete, handleTimeUp, totalQuestions]);
+  }, [currentQuestionIndex, showExplanation, isQuizComplete, totalQuestions]);
 
   const handleAnswerSelect = (answerIndex: number) => {
     if (showExplanation) return;
@@ -66,15 +143,15 @@ export const EpisodeQuiz = ({ episode }: EpisodeQuizProps) => {
 
   const handleSubmitAnswer = () => {
     if (isTextInputQuestion) {
-      // Text input question - compare answer (case insensitive)
-      const correctAnswer = currentQuestion.answers[0].answerText.toLowerCase().trim();
+      const correctAnswer = currentQuestion.answers[0].answerText
+        .toLowerCase()
+        .trim();
       const userAnswer = textAnswer.toLowerCase().trim();
       const isCorrect = correctAnswer === userAnswer;
 
       setIsTextAnswerCorrect(isCorrect);
       if (isCorrect) setScore((prev) => prev + 1);
     } else {
-      // Multiple choice question
       if (selectedAnswer === null) return;
 
       const isCorrect = currentQuestion.answers[selectedAnswer].isCorrect;
@@ -98,232 +175,401 @@ export const EpisodeQuiz = ({ episode }: EpisodeQuizProps) => {
   };
 
   const handleBackToEpisodes = () => {
-    router.push(`/countries/${episode.season.country.slug}/seasons/${episode.season.number}/episodes`);
+    router.push(
+      `/countries/${episode.season.country.slug}/seasons/${episode.season.number}/episodes`,
+    );
   };
 
-  const getAnswerButtonStyle = (index: number, isCorrect: boolean): string => {
-    const isSelected = selectedAnswer === index;
-
-    if (isSelected && showExplanation) {
-      if (isCorrect) return "border-green-500 bg-green-500/10";
-      return "border-red-500 bg-red-500/10";
-    }
-
-    if (isSelected) return "border-primary bg-primary/10";
-
-    if (showExplanation && isCorrect) return "border-green-500 bg-green-500/10";
-
-    return "border-border hover:border-primary/50";
-  };
-
-  const getTextInputStyle = (): string => {
-    if (!showExplanation) return "";
-    if (isTextAnswerCorrect) return "border-green-500 bg-green-500/10";
-    return "border-red-500 bg-red-500/10";
-  };
-
-  const canSubmit = isTextInputQuestion ? textAnswer.trim().length > 0 : selectedAnswer !== null;
+  const canSubmit = isTextInputQuestion
+    ? textAnswer.trim().length > 0
+    : selectedAnswer !== null;
 
   // No questions available
   if (totalQuestions === 0) {
     return (
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <Card className="p-8 text-center">
-          <h1 className="text-2xl font-bold mb-4">No Questions Available</h1>
-          <p className="text-muted-foreground mb-6">
-            This episode doesn&apos;t have any questions yet.
-          </p>
-          <Button onClick={handleBackToEpisodes}>
-            Back to Episodes
-          </Button>
-        </Card>
+      <div
+        className="h-screen w-screen overflow-hidden relative bg-cover bg-center bg-no-repeat flex items-center justify-center"
+        style={BACKGROUND_STYLES}
+      >
+        <div className="absolute inset-0 bg-black/40" />
+        <div className="relative z-10 golden-border">
+          <div className="p-8 bg-card backdrop-blur-sm rounded-xl text-center">
+            <h1 className="text-2xl font-bold mb-4 text-white">
+              No Questions Available
+            </h1>
+            <p className="text-gray-300 mb-6">
+              This episode does not have any questions yet.
+            </p>
+            <Button onClick={handleBackToEpisodes} className={GOLDEN_BUTTON_STYLES}>
+              Back to Episodes
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }
 
   if (isQuizComplete) {
-    return (
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <Card className="p-8 text-center">
-          <h1 className="text-3xl font-bold mb-4">Episode Complete!</h1>
-          <div className="mb-8">
-            <p className="text-5xl font-bold text-primary mb-2">
-              {score}/{totalQuestions}
-            </p>
-            <p className="text-muted-foreground">Questions Correct</p>
-          </div>
+    const successRate = Math.round((score / totalQuestions) * 100);
 
-          <div className="space-y-4 mb-8">
-            <div className="p-4 bg-secondary rounded-lg">
-              <p className="text-sm text-muted-foreground">Success Rate</p>
-              <p className="text-2xl font-semibold">
-                {Math.round((score / totalQuestions) * 100)}%
+    return (
+      <div
+        className="h-screen w-screen overflow-hidden relative bg-cover bg-center bg-no-repeat flex items-center justify-center"
+        style={BACKGROUND_STYLES}
+      >
+        <div className="absolute inset-0 bg-black/40" />
+        <div className="relative z-10 golden-border max-w-2xl w-full mx-4">
+          <div className="p-12 bg-card backdrop-blur-sm rounded-xl text-center">
+            <h1 className="text-4xl font-bold mb-8 text-transparent bg-clip-text bg-linear-to-r from-yellow-400 to-orange-500">
+              Episode Complete!
+            </h1>
+            <div className="mb-10">
+              <p className="text-7xl font-bold text-yellow-400 mb-4">
+                {score}/{totalQuestions}
               </p>
+              <p className="text-gray-300 text-xl">Questions Correct</p>
+            </div>
+
+            <div className="golden-border-thin mb-10">
+              <div className="p-6 bg-card rounded-lg">
+                <p className="text-gray-300 mb-2">Success Rate</p>
+                <p className="text-5xl font-bold text-transparent bg-clip-text bg-linear-to-r from-yellow-400 to-orange-500">
+                  {successRate}%
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-4 justify-center">
+              <Button
+                variant="outline"
+                onClick={handleBackToEpisodes}
+                className={OUTLINE_BUTTON_STYLES}
+              >
+                Back to Episodes
+              </Button>
+              <Button
+                onClick={() => window.location.reload()}
+                className={GOLDEN_BUTTON_STYLES}
+              >
+                Play Again
+              </Button>
             </div>
           </div>
-
-          <div className="flex gap-4 justify-center">
-            <Button variant="outline" onClick={handleBackToEpisodes}>
-              Back to Episodes
-            </Button>
-            <Button onClick={() => window.location.reload()}>
-              Play Again
-            </Button>
-          </div>
-        </Card>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      {/* Header */}
-      <div className="mb-6">
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold">
-            {episode.season.country.name} - S{episode.season.number} E{episode.number}
-          </h1>
-          <span className="text-sm text-muted-foreground">
-            Question {currentQuestionIndex + 1} of {totalQuestions}
-          </span>
-        </div>
-        <Progress value={progress} className="h-2" />
-      </div>
+    <div
+      className="h-screen w-screen overflow-hidden relative bg-cover bg-center bg-no-repeat"
+      style={BACKGROUND_STYLES}
+    >
+      {/* Dark overlay for better text visibility */}
+      <div className="absolute inset-0 bg-black/40" />
 
-      {/* Question Card */}
-      <Card className="p-6 mb-6">
-        {/* Difficulty Badge & Timer */}
-        <div className="flex justify-between items-center mb-6">
-          <span className={`px-3 py-1 rounded-full text-white font-semibold ${getDifficultyColor(currentQuestion.difficulty as DifficultyLevel)}`}>
-            {getDifficultyLabel(currentQuestion.difficulty as DifficultyLevel)} of people got this right
-          </span>
-          <div className="flex items-center gap-2">
-            <svg className="w-5 h-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span className={`font-mono text-lg ${timeLeft <= 10 ? "text-red-500" : ""}`}>
-              0:{timeLeft.toString().padStart(2, "0")}
-            </span>
+      <ScrollArea className="relative z-10 h-full w-full">
+        <div className="flex flex-col max-w-7xl mx-auto">
+          {/* Top Header - Question Number */}
+          <div className="pt-12 pb-12 shrink-0">
+            <h1 className="text-6xl md:text-7xl lg:text-8xl font-black text-center text-yellow-400 tracking-wider uppercase" style={{ fontWeight: 950, letterSpacing: '0.05em', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+              QUESTION {String(currentQuestionIndex + 1).padStart(2, '0')}
+            </h1>
           </div>
-        </div>
 
-        {/* Question Image */}
-        {currentQuestion.questionImage && (
-          <div className="mb-6">
-            <img
-              src={currentQuestion.questionImage}
-              alt="Question"
-              className="max-h-64 mx-auto rounded-lg"
-            />
-          </div>
-        )}
+          {/* Main Content Area */}
+          <div className="flex flex-col items-center px-4 pb-12 space-y-6">
+            {/* Question Layout - Vertical or Horizontal */}
+            {currentQuestion.layout === "HORIZONTAL" && currentQuestion.questionImage ? (
+              // Horizontal Layout - Text beside images
+              <div className="w-full max-w-6xl">
+                <div className="flex flex-col lg:flex-row gap-6 lg:items-stretch">
+                  {/* Question Text */}
+                  <div className="flex-1">
+                    <div className="golden-border h-full">
+                      <div className="p-6 bg-card backdrop-blur-sm rounded-xl h-full flex items-center justify-center">
+                        <div className="quiz-question">
+                          {currentQuestion.questionText}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
 
-        {/* Question */}
-        <h2 className="text-xl font-semibold mb-6">
-          {currentQuestion.questionText}
-        </h2>
+                  {/* Question Images */}
+                  <div className="flex-1">
+                    <div className="flex flex-col md:flex-row gap-4 h-full">
+                      {currentQuestion.questionImage.split(',').map((img, idx) => (
+                        <div key={idx} className="flex-1 h-full">
+                          <div className="golden-border h-full">
+                            <div className="p-0 bg-card backdrop-blur-sm rounded-xl h-full min-h-75 overflow-hidden">
+                              <img
+                                src={img.trim()}
+                                alt={`Question ${idx + 1}`}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              // Vertical Layout (default) - Text above images
+              <>
+                {/* Question Text Card */}
+                <div className="w-full max-w-4xl">
+                  <div className="golden-border">
+                    <div className="p-6 bg-card backdrop-blur-sm rounded-xl">
+                      <div className="quiz-question">
+                        {currentQuestion.questionText}
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
-        {/* Answer Section */}
-        {isTextInputQuestion ? (
-          /* Text Input Answer */
-          <div className="space-y-4">
-            <Input
-              value={textAnswer}
-              onChange={(e) => setTextAnswer(e.target.value)}
-              placeholder="Type your answer..."
-              disabled={showExplanation}
-              className={`text-lg py-6 ${getTextInputStyle()}`}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && canSubmit && !showExplanation) {
-                  handleSubmitAnswer();
-                }
-              }}
-            />
-            {showExplanation && (
-              <div className={`p-4 rounded-lg ${isTextAnswerCorrect ? "bg-green-500/10 border border-green-500" : "bg-red-500/10 border border-red-500"}`}>
-                <p className="font-semibold">
-                  {isTextAnswerCorrect ? "Correct!" : "Incorrect"}
-                </p>
-                <p className="text-sm mt-1">
-                  The correct answer is: <span className="font-semibold">{currentQuestion.answers[0].answerText}</span>
-                </p>
+                {/* Question Images Cards */}
+                {currentQuestion.questionImage && (
+                  <div className="w-full max-w-4xl">
+                    <div className="flex flex-col md:flex-row gap-4">
+                      {currentQuestion.questionImage.split(',').map((img, idx) => (
+                        <div key={idx} className="flex-1">
+                          <div className="golden-border h-full">
+                            <div className="p-4 bg-card backdrop-blur-sm rounded-xl h-full flex items-center justify-center">
+                              <img
+                                src={img.trim()}
+                                alt={`Question ${idx + 1}`}
+                                className="w-full h-48 object-contain rounded-lg"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* Answer Section Card */}
+            <div className="w-full max-w-4xl">
+              <div className="golden-border">
+                <div className="p-6 bg-card backdrop-blur-sm rounded-xl">
+                  {isTextInputQuestion ? (
+                    /* Text Input Answer */
+                    <div className="space-y-4">
+                      <Input
+                        value={textAnswer}
+                        onChange={(e) => setTextAnswer(e.target.value)}
+                        placeholder="Type your answer..."
+                        disabled={showExplanation}
+                        className={cn(
+                          "text-xl py-8 bg-card border-2 text-white placeholder:text-gray-500",
+                          showExplanation && (
+                            isTextAnswerCorrect
+                              ? "border-green-500 bg-green-500/10"
+                              : "border-red-500 bg-red-500/10"
+                          ),
+                          !showExplanation && "border-gray-600 focus:border-yellow-500"
+                        )}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && canSubmit && !showExplanation)
+                            handleSubmitAnswer();
+                        }}
+                      />
+                      {showExplanation && (
+                        <div
+                          className={cn(
+                            "p-4 rounded-lg border-2",
+                            isTextAnswerCorrect
+                              ? "bg-green-500/10 border-green-500"
+                              : "bg-red-500/10 border-red-500"
+                          )}
+                        >
+                          <p className="font-bold text-white">
+                            {isTextAnswerCorrect ? "Correct!" : "Incorrect"}
+                          </p>
+                          <p className="text-gray-300 mt-1">
+                            The correct answer is:{" "}
+                            <span className="font-bold text-yellow-400">
+                              {currentQuestion.answers[0].answerText}
+                            </span>
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    /* Multiple Choice Answers */
+                    <div className={cn(
+                      "flex gap-3",
+                      currentQuestion.answers.some(a => a.answerImage)
+                        ? "flex-wrap justify-center"
+                        : "flex-col"
+                    )}>
+                      {currentQuestion.answers.map((answer, index) => {
+                        const isSelected = selectedAnswer === index;
+                        const isSelectedIncorrect = isSelected && !answer.isCorrect;
+
+                        return (
+                          <button
+                            key={answer.id}
+                            onClick={() => handleAnswerSelect(index)}
+                            disabled={showExplanation}
+                            className={cn(
+                              "golden-border-thin transition-all transform hover:scale-105 cursor-pointer",
+                              isSelected && !showExplanation && "scale-105",
+                              "disabled:hover:scale-100 disabled:cursor-not-allowed",
+                              answer.answerImage ? "aspect-square w-32 md:w-36" : "w-full max-w-md"
+                            )}
+                          >
+                            <div
+                              className={cn(
+                                "rounded-lg flex relative overflow-hidden",
+                                answer.answerImage ? "p-0 h-full" : "p-3 items-center gap-3",
+                                getAnswerButtonClasses(
+                                  isSelected,
+                                  answer.isCorrect,
+                                  showExplanation,
+                                  selectedAnswer,
+                                  index
+                                )
+                              )}
+                            >
+                              {answer.answerImage ? (
+                                <>
+                                  {/* Image fills the entire square */}
+                                  <img
+                                    src={answer.answerImage}
+                                    alt={`Answer ${ANSWER_LETTERS[index]}`}
+                                    className="w-full h-full object-cover"
+                                  />
+                                  {/* Letter Badge - Positioned absolute */}
+                                  <div className="absolute top-1 left-1">
+                                    <div
+                                      className={cn(
+                                        "w-6 h-6 rounded-full flex items-center justify-center font-bold text-sm shrink-0 bg-gradient-to-br text-black",
+                                        !showExplanation && "from-yellow-400 to-orange-500",
+                                        showExplanation && answer.isCorrect && "from-green-400 to-green-600",
+                                        showExplanation && isSelectedIncorrect && "from-red-400 to-red-600",
+                                        showExplanation && !answer.isCorrect && !isSelectedIncorrect && "from-yellow-400 to-orange-500"
+                                      )}
+                                    >
+                                      {ANSWER_LETTERS[index]}
+                                    </div>
+                                  </div>
+                                </>
+                              ) : (
+                                <>
+                                  {/* Text layout with badge inline */}
+                                  <div
+                                    className={getLetterBadgeClasses(
+                                      answer.isCorrect,
+                                      isSelectedIncorrect,
+                                      showExplanation
+                                    )}
+                                  >
+                                    {ANSWER_LETTERS[index]}
+                                  </div>
+                                  <span className="text-white text-base flex-grow text-left">
+                                    {answer.answerText}
+                                  </span>
+                                </>
+                              )}
+
+                              {/* Incorrect Indicator Only */}
+                              {showExplanation && isSelectedIncorrect && (
+                                <svg
+                                  className={cn(
+                                    "text-red-400 absolute",
+                                    answer.answerImage ? "w-6 h-6 top-1 right-1" : "w-8 h-8 right-4"
+                                  )}
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={3}
+                                    d="M6 18L18 6M6 6l12 12"
+                                  />
+                                </svg>
+                              )}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* Linear Progress Timer */}
+                  <div className="mt-6">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm text-gray-400">Difficulty</span>
+                      <span className="text-sm font-bold text-yellow-400">{difficultyPercentage}%</span>
+                    </div>
+                    <Progress
+                      value={timerProgress}
+                      className="h-2 bg-gray-600 [&>div]:bg-linear-to-r [&>div]:from-yellow-400 [&>div]:to-orange-500"
+                    />
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="mt-6 flex justify-between">
+                    <Button
+                      variant="outline"
+                      onClick={handleBackToEpisodes}
+                      className={OUTLINE_BUTTON_STYLES}
+                    >
+                      Exit Quiz
+                    </Button>
+                    {!showExplanation ? (
+                      <Button
+                        onClick={handleSubmitAnswer}
+                        disabled={!canSubmit}
+                        className={cn(
+                          "font-bold transition-all",
+                          canSubmit
+                            ? GOLDEN_BUTTON_STYLES
+                            : "bg-gray-700 text-gray-400 cursor-not-allowed"
+                        )}
+                      >
+                        Submit Answer
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={handleNextQuestion}
+                        className={GOLDEN_BUTTON_STYLES}
+                      >
+                        {currentQuestionIndex < totalQuestions - 1
+                          ? "Next Question"
+                          : "Finish Quiz"}
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Explanation Card */}
+            {showExplanation && currentQuestion.explanation && (
+              <div className="w-full max-w-4xl">
+                <div className="golden-border">
+                  <div className="p-6 bg-card backdrop-blur-sm rounded-xl">
+                    <p className="font-bold mb-2 text-yellow-400">
+                      Explanation:
+                    </p>
+                    <p className="text-gray-300">
+                      {currentQuestion.explanation}
+                    </p>
+                  </div>
+                </div>
               </div>
             )}
           </div>
-        ) : (
-          /* Multiple Choice Answers */
-          <div className="space-y-3">
-            {currentQuestion.answers.map((answer, index) => (
-              <button
-                key={answer.id}
-                onClick={() => handleAnswerSelect(index)}
-                disabled={showExplanation}
-                className={`w-full text-left p-4 rounded-lg border transition-all ${getAnswerButtonStyle(index, answer.isCorrect)}`}
-              >
-                <div className="flex items-center gap-3">
-                  <span className="font-semibold">
-                    {String.fromCharCode(65 + index)}.
-                  </span>
-                  {answer.answerImage ? (
-                    <img
-                      src={answer.answerImage}
-                      alt={`Answer ${String.fromCharCode(65 + index)}`}
-                      className="h-16 rounded"
-                    />
-                  ) : (
-                    <span>{answer.answerText}</span>
-                  )}
-                  {showExplanation && answer.isCorrect && (
-                    <svg className="w-5 h-5 text-green-500 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                  )}
-                  {showExplanation && selectedAnswer === index && !answer.isCorrect && (
-                    <svg className="w-5 h-5 text-red-500 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  )}
-                </div>
-              </button>
-            ))}
-          </div>
-        )}
-
-        {/* Explanation */}
-        {showExplanation && currentQuestion.explanation && (
-          <div className="mt-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-            <p className="font-semibold mb-2">Explanation:</p>
-            <p className="text-sm">{currentQuestion.explanation}</p>
-          </div>
-        )}
-
-        {/* Action Buttons */}
-        <div className="mt-6 flex justify-between">
-          <Button
-            variant="outline"
-            onClick={handleBackToEpisodes}
-          >
-            Exit Quiz
-          </Button>
-          {!showExplanation ? (
-            <Button
-              onClick={handleSubmitAnswer}
-              disabled={!canSubmit}
-            >
-              Submit Answer
-            </Button>
-          ) : (
-            <Button onClick={handleNextQuestion}>
-              {currentQuestionIndex < totalQuestions - 1 ? "Next Question" : "Finish Quiz"}
-            </Button>
-          )}
         </div>
-      </Card>
-
-      {/* Score Tracker */}
-      <div className="text-center text-sm text-muted-foreground">
-        Current Score: {score}/{currentQuestionIndex + (showExplanation ? 1 : 0)}
-      </div>
+      </ScrollArea>
     </div>
   );
 };

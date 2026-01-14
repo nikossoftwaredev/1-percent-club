@@ -81,3 +81,15 @@ export const TypographyMono = ({ className, children, ...props }: TypographyProp
     {children}
   </code>
 );
+
+export const TypographyQuizQuestion = ({ className, children, ...props }: TypographyProps) => (
+  <p
+    className={cn(
+      "quiz-question",
+      className
+    )}
+    {...props}
+  >
+    {children}
+  </p>
+);

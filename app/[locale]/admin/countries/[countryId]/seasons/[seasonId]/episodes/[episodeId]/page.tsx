@@ -1,7 +1,7 @@
 import { setRequestLocale } from "next-intl/server";
 import { QuestionsManager } from "@/components/admin/questions-manager";
 import { TypographyH2 } from "@/components/ui/typography";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Play } from "lucide-react";
 import { Link } from "@/lib/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,6 +39,17 @@ const QuestionsPage = async ({ params }: QuestionsPageProps) => {
           {episode?.season?.country?.name} - S{episode?.season?.number} E
           {episode?.number} - Questions
         </TypographyH2>
+        {episode && (
+          <Button variant="default" size="default" asChild>
+            <Link
+              href={`/countries/${episode.season.country.slug}/seasons/${episode.season.number}/episodes/${episode.number}`}
+              target="_blank"
+            >
+              <Play className="h-4 w-4 mr-2" />
+              Play Episode
+            </Link>
+          </Button>
+        )}
       </div>
       <QuestionsManager
         countryId={countryId}

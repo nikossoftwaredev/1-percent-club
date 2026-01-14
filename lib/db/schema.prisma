@@ -100,6 +100,7 @@ model Question {
   id            String   @id @default(cuid())
   questionText  String   @db.Text @map("question_text")
   questionImage String?  @map("question_image") // URL to uploaded image
+  layout        QuestionLayout @default(VERTICAL) // Layout for question text and image
   difficulty    DifficultyLevel
   explanation   String   @db.Text // Explanation of the correct answer
   orderInShow   Int?     @map("order_in_show") // The order this question appeared in the episode
@@ -136,6 +137,11 @@ enum DifficultyLevel {
   TEN         @map("10")
   FIVE        @map("5")
   ONE         @map("1")
+}
+
+enum QuestionLayout {
+  VERTICAL    // Question text above image(s)
+  HORIZONTAL  // Question text beside image(s)
 }
 
 model Answer {

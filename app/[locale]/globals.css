@@ -47,71 +47,80 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+
+  /* Quiz-style dark theme as default */
+  --background: oklch(0.25 0 0); /* Dark charcoal background like in the image */
+  --foreground: oklch(0.92 0 0); /* Light gray text */
+  --card: #000000; /* Pure black for cards */
+  --card-foreground: oklch(0.92 0 0);
+  --popover: oklch(0.22 0 0);
+  --popover-foreground: oklch(0.92 0 0);
+  --primary: oklch(0.75 0.15 60); /* Golden accent */
+  --primary-foreground: oklch(0.15 0 0);
+  --secondary: oklch(0.32 0 0);
+  --secondary-foreground: oklch(0.92 0 0);
+  --muted: oklch(0.35 0 0);
+  --muted-foreground: oklch(0.65 0 0);
+  --accent: oklch(0.75 0.15 60); /* Golden accent */
+  --accent-foreground: oklch(0.15 0 0);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --border: oklch(0.4 0 0);
+  --input: oklch(0.3 0 0);
+  --ring: oklch(0.75 0.15 60);
+
+  /* Chart colors */
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+
+  /* Sidebar */
+  --sidebar: oklch(0.20 0 0);
+  --sidebar-foreground: oklch(0.92 0 0);
+  --sidebar-primary: oklch(0.75 0.15 60);
+  --sidebar-primary-foreground: oklch(0.15 0 0);
+  --sidebar-accent: oklch(0.32 0 0);
+  --sidebar-accent-foreground: oklch(0.92 0 0);
+  --sidebar-border: oklch(0.4 0 0);
+  --sidebar-ring: oklch(0.75 0.15 60);
+
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
+  /* Same as root since we want consistent quiz theme */
+  --background: oklch(0.25 0 0);
+  --foreground: oklch(0.92 0 0);
+  --card: #000000; /* Pure black for cards */
+  --card-foreground: oklch(0.92 0 0);
+  --popover: oklch(0.22 0 0);
+  --popover-foreground: oklch(0.92 0 0);
+  --primary: oklch(0.75 0.15 60);
+  --primary-foreground: oklch(0.15 0 0);
+  --secondary: oklch(0.32 0 0);
+  --secondary-foreground: oklch(0.92 0 0);
+  --muted: oklch(0.35 0 0);
+  --muted-foreground: oklch(0.65 0 0);
+  --accent: oklch(0.75 0.15 60);
+  --accent-foreground: oklch(0.15 0 0);
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  --border: oklch(0.4 0 0);
+  --input: oklch(0.3 0 0);
+  --ring: oklch(0.75 0.15 60);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --sidebar: oklch(0.20 0 0);
+  --sidebar-foreground: oklch(0.92 0 0);
+  --sidebar-primary: oklch(0.75 0.15 60);
+  --sidebar-primary-foreground: oklch(0.15 0 0);
+  --sidebar-accent: oklch(0.32 0 0);
+  --sidebar-accent-foreground: oklch(0.92 0 0);
+  --sidebar-border: oklch(0.4 0 0);
+  --sidebar-ring: oklch(0.75 0.15 60);
+
 }
 
 @layer base {
@@ -120,5 +129,114 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-size: 1.125rem; /* Default 18px base */
+    line-height: 1.4;
+    letter-spacing: 0.025em;
   }
+
+  /* Default text sizes matching quiz style */
+  h1 {
+    @apply text-3xl md:text-4xl lg:text-5xl font-semibold;
+  }
+  h2 {
+    @apply text-2xl md:text-3xl lg:text-4xl font-medium;
+  }
+  h3 {
+    @apply text-xl md:text-2xl lg:text-3xl font-medium;
+  }
+  p {
+    @apply text-base md:text-lg;
+  }
+}
+
+/* Game show golden border style */
+.golden-border {
+  @apply relative rounded-2xl;
+  background: linear-gradient(135deg, #1a1a2e 0%, #0f0f23 100%);
+  padding: 4px;
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+}
+
+.golden-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 4px;
+  background: linear-gradient(
+    135deg,
+    #ffd700 0%,
+    #ffed4e 25%,
+    #ffa500 50%,
+    #ff8c00 75%,
+    #ffd700 100%
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.golden-border-thin {
+  @apply relative rounded-xl;
+  background: linear-gradient(135deg, #1a1a2e 0%, #0f0f23 100%);
+  padding: 3px;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+}
+
+.golden-border-thin::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 3px;
+  background: linear-gradient(
+    135deg,
+    #ffd700 0%,
+    #ffed4e 25%,
+    #ffa500 50%,
+    #ff8c00 75%,
+    #ffd700 100%
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Quiz question text styling */
+.quiz-question {
+  @apply text-2xl md:text-3xl lg:text-4xl font-medium text-center text-foreground;
+  line-height: 1.4;
+  letter-spacing: 0.025em;
+}
+
+.quiz-question-container {
+  @apply bg-card rounded-xl;
+  padding: 2rem 2.5rem;
+}
+
+/* Circular timer */
+.circular-timer {
+  position: relative;
+  width: 120px;
+  height: 120px;
+}
+
+.circular-timer svg {
+  transform: rotate(-90deg);
+}
+
+.circular-timer-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
 }
