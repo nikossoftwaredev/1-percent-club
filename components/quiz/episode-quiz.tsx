@@ -401,12 +401,7 @@ export const EpisodeQuiz = ({ episode }: EpisodeQuizProps) => {
                     </div>
                   ) : (
                     /* Multiple Choice Answers */
-                    <div className={cn(
-                      "flex gap-3",
-                      currentQuestion.answers.some(a => a.answerImage)
-                        ? "flex-wrap justify-center"
-                        : "flex-col"
-                    )}>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 w-full">
                       {currentQuestion.answers.map((answer, index) => {
                         const isSelected = selectedAnswer === index;
                         const isSelectedIncorrect = isSelected && !answer.isCorrect;
@@ -420,13 +415,13 @@ export const EpisodeQuiz = ({ episode }: EpisodeQuizProps) => {
                               "golden-border-thin transition-all transform hover:scale-105 cursor-pointer",
                               isSelected && !showExplanation && "scale-105",
                               "disabled:hover:scale-100 disabled:cursor-not-allowed",
-                              answer.answerImage ? "aspect-square w-32 md:w-36" : "w-full max-w-md"
+                              answer.answerImage ? "aspect-square" : "min-h-[80px]"
                             )}
                           >
                             <div
                               className={cn(
-                                "rounded-lg flex relative overflow-hidden",
-                                answer.answerImage ? "p-0 h-full" : "p-3 items-center gap-3",
+                                "rounded-lg flex relative overflow-hidden h-full",
+                                answer.answerImage ? "p-0" : "p-4 items-center gap-3",
                                 getAnswerButtonClasses(
                                   isSelected,
                                   answer.isCorrect,
@@ -471,7 +466,7 @@ export const EpisodeQuiz = ({ episode }: EpisodeQuizProps) => {
                                   >
                                     {ANSWER_LETTERS[index]}
                                   </div>
-                                  <span className="text-white text-base flex-grow text-left">
+                                  <span className="text-white text-base font-medium flex-1 text-left">
                                     {answer.answerText}
                                   </span>
                                 </>
