@@ -49,6 +49,7 @@ interface AnswerFormItem {
 interface QuestionFormData {
   questionText: string;
   questionImage: string;
+  questionExtraText: string;
   layout: QuestionLayout;
   explanation: string;
   answerType: AnswerType;
@@ -68,6 +69,7 @@ const createEmptyAnswers = (count: number = 4): AnswerFormItem[] => {
 const initialFormData: QuestionFormData = {
   questionText: "",
   questionImage: "",
+  questionExtraText: "",
   layout: "VERTICAL" as QuestionLayout,
   explanation: "",
   answerType: "text",
@@ -194,6 +196,7 @@ export const QuestionsManager = ({
           id: selectedQuestion.id,
           questionText: formData.questionText,
           questionImage: formData.questionImage || null,
+          questionExtraText: formData.questionExtraText || null,
           layout: formData.layout,
           explanation: formData.explanation,
           answers,
@@ -211,10 +214,18 @@ export const QuestionsManager = ({
                 ...q,
                 questionText: formData.questionText,
                 questionImage: formData.questionImage || null,
+                questionExtraText: formData.questionExtraText || null,
                 explanation: formData.explanation,
                 answers: answers.map((a, i) => ({
+                  ...q.answers[i],
                   id: q.answers[i]?.id || `new-${i}`,
-                  ...a,
+                  questionId: q.id,
+                  answerText: a.answerText,
+                  answerImage: a.answerImage,
+                  isCorrect: a.isCorrect,
+                  orderIndex: a.orderIndex,
+                  createdAt: q.answers[i]?.createdAt || new Date(),
+                  updatedAt: new Date(),
                 })),
               }
             : q
@@ -237,6 +248,7 @@ export const QuestionsManager = ({
     setFormData({
       questionText: question.questionText,
       questionImage: question.questionImage || "",
+      questionExtraText: question.questionExtraText || "",
       layout: (question.layout || "VERTICAL") as QuestionLayout,
       explanation: question.explanation,
       answerType: isTextInputType ? "text" : "select",
@@ -381,18 +393,31 @@ export const QuestionsManager = ({
               />
             </div>
 
-            {/* Question Image */}
-            <div className="grid gap-2">
-              <Label>Question Image (optional)</Label>
-              <ImageUpload
-                value={formData.questionImage}
-                onChange={(url) => handleFormChange("questionImage", url)}
-                disabled={isPending}
-              />
+            {/* Question Image & Extra Text */}
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-2">
+                <Label>Question Image (optional)</Label>
+                <ImageUpload
+                  value={formData.questionImage}
+                  onChange={(url) => handleFormChange("questionImage", url)}
+                  disabled={isPending}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="questionExtraText">Extra Text (optional)</Label>
+                <Textarea
+                  id="questionExtraText"
+                  value={formData.questionExtraText}
+                  onChange={(e) => handleFormChange("questionExtraText", e.target.value)}
+                  placeholder="Additional text to display with the question..."
+                  rows={3}
+                  disabled={isPending}
+                />
+              </div>
             </div>
 
             {/* Layout */}
-            {formData.questionImage && (
+            {(formData.questionImage || formData.questionExtraText) && (
               <div className="grid gap-2">
                 <Label>Layout</Label>
                 <Select

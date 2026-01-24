@@ -297,20 +297,32 @@ export const EpisodeQuiz = ({ episode }: EpisodeQuizProps) => {
 
                   {/* Question Images */}
                   <div className="flex-1">
-                    <div className="flex flex-col md:flex-row gap-4 h-full">
-                      {currentQuestion.questionImage.split(',').map((img, idx) => (
-                        <div key={idx} className="flex-1 h-full">
-                          <div className="golden-border h-full">
-                            <div className="p-0 bg-card backdrop-blur-sm rounded-xl h-full min-h-75 overflow-hidden">
-                              <img
-                                src={img.trim()}
-                                alt={`Question ${idx + 1}`}
-                                className="w-full h-full object-cover"
-                              />
+                    <div className="flex flex-col gap-4 h-full">
+                      <div className="flex flex-col md:flex-row gap-4 flex-1">
+                        {currentQuestion.questionImage.split(',').map((img, idx) => (
+                          <div key={idx} className="flex-1 h-full">
+                            <div className="golden-border h-full">
+                              <div className="p-0 bg-card backdrop-blur-sm rounded-xl h-full min-h-75 overflow-hidden">
+                                <img
+                                  src={img.trim()}
+                                  alt={`Question ${idx + 1}`}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
                             </div>
                           </div>
+                        ))}
+                      </div>
+                      {/* Extra Text for Horizontal Layout */}
+                      {currentQuestion.questionExtraText && (
+                        <div className="golden-border">
+                          <div className="p-4 bg-card backdrop-blur-sm rounded-xl">
+                            <p className="text-gray-300 text-center">
+                              {currentQuestion.questionExtraText}
+                            </p>
+                          </div>
                         </div>
-                      ))}
+                      )}
                     </div>
                   </div>
                 </div>
@@ -346,6 +358,19 @@ export const EpisodeQuiz = ({ episode }: EpisodeQuizProps) => {
                           </div>
                         </div>
                       ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Extra Text for Vertical Layout */}
+                {currentQuestion.questionExtraText && (
+                  <div className="w-full max-w-4xl">
+                    <div className="golden-border">
+                      <div className="p-4 bg-card backdrop-blur-sm rounded-xl">
+                        <p className="text-gray-300 text-center">
+                          {currentQuestion.questionExtraText}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 )}

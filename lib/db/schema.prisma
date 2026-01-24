@@ -99,8 +99,9 @@ model Episode {
 model Question {
   id            String   @id @default(cuid())
   questionText  String   @db.Text @map("question_text")
-  questionImage String?  @map("question_image") // URL to uploaded image
-  layout        QuestionLayout @default(VERTICAL) // Layout for question text and image
+  questionImage     String?  @map("question_image") // URL to uploaded image
+  questionExtraText String?  @db.Text @map("question_extra_text") // Optional extra text displayed with image
+  layout            QuestionLayout @default(VERTICAL) // Layout for question text and image
   difficulty    DifficultyLevel
   explanation   String   @db.Text // Explanation of the correct answer
   orderInShow   Int?     @map("order_in_show") // The order this question appeared in the episode

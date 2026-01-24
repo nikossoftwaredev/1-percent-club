@@ -17,6 +17,7 @@ export interface QuizQuestion {
   id: string;
   questionText: string;
   questionImage: string | null;
+  questionExtraText: string | null;
   layout: string;
   difficulty: string;
   explanation: string;

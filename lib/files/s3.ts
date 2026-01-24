@@ -1,6 +1,6 @@
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 
-// Supabase S3-compatible storage configuration
+// S3-compatible storage configuration
 const s3Client = new S3Client({
   region: process.env.SUPABASE_S3_REGION!,
   endpoint: process.env.SUPABASE_S3_ENDPOINT!,

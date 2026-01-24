@@ -2,34 +2,20 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
-import { QuestionLayout } from "@prisma/client";
+import type { Prisma, QuestionLayout } from "@prisma/client";
 
-export interface QuestionWithAnswers {
-  id: string;
-  questionText: string;
-  questionImage: string | null;
-  layout: string;
-  difficulty: string;
-  explanation: string;
-  orderInShow: number | null;
-  isActive: boolean;
-  answers: {
-    id: string;
-    answerText: string;
-    answerImage: string | null;
-    isCorrect: boolean;
-    orderIndex: number;
-  }[];
-}
+export type QuestionWithAnswers = Prisma.QuestionGetPayload<{
+  include: { answers: true };
+}>;
 
 interface UpdateQuestionInput {
   id: string;
   questionText: string;
   questionImage?: string | null;
+  questionExtraText?: string | null;
   layout?: QuestionLayout;
   explanation: string;
   answers?: {
-    id?: string;
     answerText: string;
     answerImage?: string | null;
     isCorrect: boolean;
@@ -77,30 +63,28 @@ export const updateQuestion = async (
 ) => {
   const { id, answers, ...data } = input;
 
-  const question = await prisma.$transaction(async (tx) => {
-    const updatedQuestion = await tx.question.update({
-      where: { id },
-      data,
+  // Update question
+  const question = await prisma.question.update({
+    where: { id },
+    data,
+  });
+
+  // Update answers if provided
+  if (answers && answers.length > 0) {
+    await prisma.answer.deleteMany({
+      where: { questionId: id },
     });
 
-    if (answers && answers.length > 0) {
-      await tx.answer.deleteMany({
-        where: { questionId: id },
-      });
-
-      await tx.answer.createMany({
-        data: answers.map((a) => ({
-          questionId: id,
-          answerText: a.answerText,
-          answerImage: a.answerImage || null,
-          isCorrect: a.isCorrect,
-          orderIndex: a.orderIndex,
-        })),
-      });
-    }
-
-    return updatedQuestion;
-  });
+    await prisma.answer.createMany({
+      data: answers.map((a) => ({
+        questionId: id,
+        answerText: a.answerText,
+        answerImage: a.answerImage || null,
+        isCorrect: a.isCorrect,
+        orderIndex: a.orderIndex,
+      })),
+    });
+  }
 
   revalidatePath(
     `/admin/countries/${countryId}/seasons/${seasonId}/episodes/${episodeId}`

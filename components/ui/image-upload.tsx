@@ -1,9 +1,12 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useId } from "react";
 import { Upload, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/general/utils";
+
+// Track which ImageUpload instance is currently active for paste
+let activeUploadId: string | null = null;
 
 interface ImageUploadProps {
   value?: string;
@@ -22,12 +25,11 @@ export const ImageUpload = ({
 }: ImageUploadProps) => {
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isActive, setIsActive] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const instanceId = useId();
 
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+  const uploadFile = async (file: File) => {
     setError(null);
     setIsUploading(true);
 
@@ -42,20 +44,56 @@ export const ImageUpload = ({
 
       const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.error || "Upload failed");
-      }
+      if (!response.ok) throw new Error(data.error || "Upload failed");
 
       onChange(data.url);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Upload failed");
     } finally {
       setIsUploading(false);
-      // Reset input so same file can be selected again
-      if (inputRef.current) {
-        inputRef.current.value = "";
-      }
+      if (inputRef.current) inputRef.current.value = "";
     }
+  };
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    await uploadFile(file);
+  };
+
+  // Check if this instance is the active one
+  useEffect(() => {
+    const checkActive = () => setIsActive(activeUploadId === instanceId);
+
+    // Poll for changes since we can't use events across instances easily
+    const interval = setInterval(checkActive, 100);
+    return () => clearInterval(interval);
+  }, [instanceId]);
+
+  useEffect(() => {
+    const handlePaste = async (e: ClipboardEvent) => {
+      if (activeUploadId !== instanceId || disabled || isUploading || value) return;
+
+      const items = e.clipboardData?.items;
+      if (!items) return;
+
+      for (const item of items) {
+        if (item.type.startsWith("image/")) {
+          e.preventDefault();
+          const file = item.getAsFile();
+          if (file) await uploadFile(file);
+          return;
+        }
+      }
+    };
+
+    document.addEventListener("paste", handlePaste);
+    return () => document.removeEventListener("paste", handlePaste);
+  }, [instanceId, disabled, isUploading, value]);
+
+  const handleMouseEnter = () => {
+    activeUploadId = instanceId;
+    setIsActive(true);
   };
 
   const handleRemove = () => {
@@ -64,7 +102,10 @@ export const ImageUpload = ({
   };
 
   return (
-    <div className={cn("space-y-2", className)}>
+    <div
+      onMouseEnter={handleMouseEnter}
+      className={cn("space-y-2", className)}
+    >
       <input
         ref={inputRef}
         type="file"
@@ -93,22 +134,26 @@ export const ImageUpload = ({
           </Button>
         </div>
       ) : (
-        <Button
-          type="button"
-          variant="outline"
+        <div
           onClick={() => inputRef.current?.click()}
-          disabled={disabled || isUploading}
-          className="h-24 w-24 flex-col gap-2"
+          className={cn(
+            "h-24 w-24 flex flex-col items-center justify-center gap-2 rounded-md border border-dashed cursor-pointer transition-colors",
+            "hover:bg-muted/50 hover:border-primary/50",
+            isActive && "border-primary ring-2 ring-primary/20",
+            (disabled || isUploading) && "opacity-50 cursor-not-allowed"
+          )}
         >
           {isUploading ? (
-            <Loader2 className="h-6 w-6 animate-spin" />
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
           ) : (
             <>
-              <Upload className="h-6 w-6" />
-              <span className="text-xs">Upload</span>
+              <Upload className="h-6 w-6 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground">
+                {isActive ? "Ctrl+V" : "Upload"}
+              </span>
             </>
           )}
-        </Button>
+        </div>
       )}
 
       {error && <p className="text-sm text-destructive">{error}</p>}
