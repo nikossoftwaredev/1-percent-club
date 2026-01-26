@@ -1,7 +1,10 @@
 "use client";
 
+import { LogOut, Shield } from "lucide-react";
 import { signOut } from "next-auth/react";
-import { LogOut } from "lucide-react";
+
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,8 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import { Link } from "@/lib/i18n/navigation";
 
 interface ProfileAvatarProps {
   user: {
@@ -19,9 +21,10 @@ interface ProfileAvatarProps {
     email?: string | null;
     image?: string | null;
   };
+  isAdmin?: boolean;
 }
 
-export const ProfileAvatar = ({ user }: ProfileAvatarProps) => {
+export const ProfileAvatar = ({ user, isAdmin }: ProfileAvatarProps) => {
   const initials = user.name
     ?.split(" ")
     .map((n) => n[0])
@@ -54,6 +57,17 @@ export const ProfileAvatar = ({ user }: ProfileAvatarProps) => {
             </p>
           </div>
         </DropdownMenuLabel>
+        {isAdmin && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild className="cursor-pointer">
+              <Link href="/admin">
+                <Shield className="mr-2 h-4 w-4" />
+                <span>Admin</span>
+              </Link>
+            </DropdownMenuItem>
+          </>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={handleSignOut}

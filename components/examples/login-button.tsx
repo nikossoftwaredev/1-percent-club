@@ -1,12 +1,21 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useSession, signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { ProfileAvatar } from "@/components/auth/profile-avatar";
 import { LogIn } from "lucide-react";
+import { isAdminEmail } from "@/server-actions/admin";
 
 export const LoginButton = () => {
   const { data: session, status } = useSession();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    if (session?.user?.email) {
+      isAdminEmail(session.user.email).then(setIsAdmin);
+    }
+  }, [session?.user?.email]);
 
   if (status === "loading") {
     return (
@@ -16,7 +25,7 @@ export const LoginButton = () => {
     );
   }
 
-  if (session?.user) return <ProfileAvatar user={session.user} />;
+  if (session?.user) return <ProfileAvatar user={session.user} isAdmin={isAdmin} />;
 
   return (
     <Button onClick={() => signIn("google")} size="sm" className="gap-2">

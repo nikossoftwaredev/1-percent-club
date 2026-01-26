@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Plus, Pencil, Minus } from "lucide-react";
+import { Plus, Pencil, Minus, Eye } from "lucide-react";
+import { Link } from "@/lib/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -83,6 +84,7 @@ interface QuestionsManagerProps {
   seasonId: string;
   episodeId: string;
   initialQuestions: QuestionWithAnswers[];
+  quizUrl?: string;
 }
 
 export const QuestionsManager = ({
@@ -90,6 +92,7 @@ export const QuestionsManager = ({
   seasonId,
   episodeId,
   initialQuestions,
+  quizUrl,
 }: QuestionsManagerProps) => {
   const [questions, setQuestions] = useState<QuestionWithAnswers[]>(initialQuestions);
   const [selectedQuestion, setSelectedQuestion] = useState<QuestionWithAnswers | null>(null);
@@ -277,6 +280,14 @@ export const QuestionsManager = ({
     return aIndex - bIndex;
   });
 
+  // Get question position in quiz order (by orderInShow)
+  const getQuizPosition = (questionId: string): number => {
+    const quizOrder = [...questions].sort((a, b) =>
+      (a.orderInShow ?? 0) - (b.orderInShow ?? 0)
+    );
+    return quizOrder.findIndex(q => q.id === questionId) + 1;
+  };
+
   return (
     <>
       <Card>
@@ -337,17 +348,35 @@ export const QuestionsManager = ({
                       )}
                     </TableCell>
                     <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 cursor-pointer"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openEditDialog(question);
-                        }}
-                      >
-                        <Pencil className="h-3 w-3" />
-                      </Button>
+                      <div className="flex items-center gap-1">
+                        {quizUrl && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 cursor-pointer"
+                            asChild
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <Link
+                              href={`${quizUrl}?question=${getQuizPosition(question.id)}`}
+                              target="_blank"
+                            >
+                              <Eye className="h-3 w-3" />
+                            </Link>
+                          </Button>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 cursor-pointer"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openEditDialog(question);
+                          }}
+                        >
+                          <Pencil className="h-3 w-3" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 );

@@ -27,6 +27,10 @@ const QuestionsPage = async ({ params }: QuestionsPageProps) => {
     getEpisodeWithSeasonAndCountry(episodeId),
   ]);
 
+  const quizUrl = episode
+    ? `/countries/${episode.season.country.slug}/seasons/${episode.season.number}/episodes/${episode.number}`
+    : undefined;
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
@@ -39,12 +43,9 @@ const QuestionsPage = async ({ params }: QuestionsPageProps) => {
           {episode?.season?.country?.name} - S{episode?.season?.number} E
           {episode?.number} - Questions
         </TypographyH2>
-        {episode && (
+        {quizUrl && (
           <Button variant="default" size="default" asChild>
-            <Link
-              href={`/countries/${episode.season.country.slug}/seasons/${episode.season.number}/episodes/${episode.number}`}
-              target="_blank"
-            >
+            <Link href={quizUrl} target="_blank">
               <Play className="h-4 w-4 mr-2" />
               Play Episode
             </Link>
@@ -56,6 +57,7 @@ const QuestionsPage = async ({ params }: QuestionsPageProps) => {
         seasonId={seasonId}
         episodeId={episodeId}
         initialQuestions={questions}
+        quizUrl={quizUrl}
       />
     </div>
   );

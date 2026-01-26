@@ -3,7 +3,7 @@ import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/s
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { Separator } from "@/components/ui/separator";
 import { BaseLayoutProps } from "@/types/page-props";
-import { isAdmin } from "@/lib/auth/is-admin";
+import { isAdmin } from "@/server-actions/admin";
 import { redirect } from "@/lib/i18n/navigation";
 
 const AdminLayout = async ({ children, params }: BaseLayoutProps) => {

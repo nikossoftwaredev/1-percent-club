@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { Share2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -180,6 +181,29 @@ export const EpisodeQuiz = ({ episode }: EpisodeQuizProps) => {
     );
   };
 
+  const handleShare = async () => {
+    const questionUrl = window.location.href;
+    const shareData = {
+      title: `1% Club - Question ${currentQuestionIndex + 1}`,
+      text: `Can you answer this question? Only ${difficultyPercentage}% of people got it right!`,
+      url: questionUrl,
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        // User cancelled or share failed - copy to clipboard as fallback
+        if (err instanceof Error && err.name !== "AbortError") {
+          await navigator.clipboard.writeText(questionUrl);
+        }
+      }
+    } else {
+      // Fallback: copy to clipboard
+      await navigator.clipboard.writeText(questionUrl);
+    }
+  };
+
   const canSubmit = isTextInputQuestion
     ? textAnswer.trim().length > 0
     : selectedAnswer !== null;
@@ -288,7 +312,7 @@ export const EpisodeQuiz = ({ episode }: EpisodeQuizProps) => {
                   <div className="flex-1">
                     <div className="golden-border h-full">
                       <div className="p-6 bg-card backdrop-blur-sm rounded-xl h-full flex items-center justify-center">
-                        <div className="quiz-question">
+                        <div className="quiz-question wrap-break-word">
                           {currentQuestion.questionText}
                         </div>
                       </div>
@@ -317,7 +341,7 @@ export const EpisodeQuiz = ({ episode }: EpisodeQuizProps) => {
                       {currentQuestion.questionExtraText && (
                         <div className="golden-border">
                           <div className="p-4 bg-card backdrop-blur-sm rounded-xl">
-                            <p className="text-gray-300 text-center">
+                            <p className="text-gray-300 text-center wrap-break-word whitespace-pre-line">
                               {currentQuestion.questionExtraText}
                             </p>
                           </div>
@@ -334,7 +358,7 @@ export const EpisodeQuiz = ({ episode }: EpisodeQuizProps) => {
                 <div className="w-full max-w-4xl">
                   <div className="golden-border">
                     <div className="p-6 bg-card backdrop-blur-sm rounded-xl">
-                      <div className="quiz-question">
+                      <div className="quiz-question wrap-break-word">
                         {currentQuestion.questionText}
                       </div>
                     </div>
@@ -367,7 +391,7 @@ export const EpisodeQuiz = ({ episode }: EpisodeQuizProps) => {
                   <div className="w-full max-w-4xl">
                     <div className="golden-border">
                       <div className="p-4 bg-card backdrop-blur-sm rounded-xl">
-                        <p className="text-gray-300 text-center">
+                        <p className="text-gray-300 text-center wrap-break-word whitespace-pre-line">
                           {currentQuestion.questionExtraText}
                         </p>
                       </div>
@@ -491,7 +515,7 @@ export const EpisodeQuiz = ({ episode }: EpisodeQuizProps) => {
                                   >
                                     {ANSWER_LETTERS[index]}
                                   </div>
-                                  <span className="text-white text-base font-medium flex-1 text-left">
+                                  <span className="text-white text-base font-medium flex-1 text-left wrap-break-word">
                                     {answer.answerText}
                                   </span>
                                 </>
@@ -558,14 +582,24 @@ export const EpisodeQuiz = ({ episode }: EpisodeQuizProps) => {
                         Submit Answer
                       </Button>
                     ) : (
-                      <Button
-                        onClick={handleNextQuestion}
-                        className={GOLDEN_BUTTON_STYLES}
-                      >
-                        {currentQuestionIndex < totalQuestions - 1
-                          ? "Next Question"
-                          : "Finish Quiz"}
-                      </Button>
+                      <div className="flex gap-3">
+                        <Button
+                          variant="outline"
+                          onClick={handleShare}
+                          className={OUTLINE_BUTTON_STYLES}
+                        >
+                          <Share2 className="h-4 w-4 mr-2" />
+                          Share
+                        </Button>
+                        <Button
+                          onClick={handleNextQuestion}
+                          className={GOLDEN_BUTTON_STYLES}
+                        >
+                          {currentQuestionIndex < totalQuestions - 1
+                            ? "Next Question"
+                            : "Finish Quiz"}
+                        </Button>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -580,7 +614,7 @@ export const EpisodeQuiz = ({ episode }: EpisodeQuizProps) => {
                     <p className="font-bold mb-2 text-yellow-400">
                       Explanation:
                     </p>
-                    <p className="text-gray-300">
+                    <p className="text-gray-300 wrap-break-word whitespace-pre-line">
                       {currentQuestion.explanation}
                     </p>
                   </div>
