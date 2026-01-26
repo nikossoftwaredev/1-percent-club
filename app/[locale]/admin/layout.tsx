@@ -1,10 +1,11 @@
 import { setRequestLocale } from "next-intl/server";
-import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
+
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { Separator } from "@/components/ui/separator";
-import { BaseLayoutProps } from "@/types/page-props";
-import { isAdmin } from "@/server-actions/admin";
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { redirect } from "@/lib/i18n/navigation";
+import { isAdmin } from "@/server-actions/admin";
+import { BaseLayoutProps } from "@/types/page-props";
 
 const AdminLayout = async ({ children, params }: BaseLayoutProps) => {
   const { locale } = await params;

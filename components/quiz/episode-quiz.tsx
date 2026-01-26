@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import { Share2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -65,23 +64,11 @@ const getLetterBadgeClasses = (
 
 interface EpisodeQuizProps {
   episode: EpisodeForQuiz;
+  initialQuestionIndex?: number;
 }
 
-export const EpisodeQuiz = ({ episode }: EpisodeQuizProps) => {
+export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizProps) => {
   const router = useRouter();
-  const searchParams = useSearchParams();
-
-  // Initialize question index from URL parameter or default to 0
-  const initialQuestionIndex = (() => {
-    const questionParam = searchParams.get('question');
-    if (questionParam) {
-      const questionNum = parseInt(questionParam, 10);
-      if (!isNaN(questionNum) && questionNum > 0 && questionNum <= episode.questions.length) {
-        return questionNum - 1; // Convert to 0-based index
-      }
-    }
-    return 0;
-  })();
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(initialQuestionIndex);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
@@ -115,10 +102,10 @@ export const EpisodeQuiz = ({ episode }: EpisodeQuizProps) => {
 
   // Update URL when question changes
   useEffect(() => {
-    const url = new URL(window.location.href);
-    url.searchParams.set('question', String(currentQuestionIndex + 1));
-    window.history.replaceState({}, '', url.toString());
-  }, [currentQuestionIndex]);
+    const questionNumber = currentQuestionIndex + 1;
+    const basePath = `/countries/${episode.season.country.slug}/seasons/${episode.season.number}/episodes/${episode.number}/question`;
+    router.replace(`${basePath}/${questionNumber}`);
+  }, [currentQuestionIndex, episode.season.country.slug, episode.season.number, episode.number, router]);
 
   // Timer effect - just for visual effect, no actions when it ends
   useEffect(() => {
@@ -341,9 +328,9 @@ export const EpisodeQuiz = ({ episode }: EpisodeQuizProps) => {
                       {currentQuestion.questionExtraText && (
                         <div className="golden-border">
                           <div className="p-4 bg-card backdrop-blur-sm rounded-xl">
-                            <p className="text-gray-300 text-center wrap-break-word whitespace-pre-line">
+                            <div className="quiz-question wrap-break-word">
                               {currentQuestion.questionExtraText}
-                            </p>
+                            </div>
                           </div>
                         </div>
                       )}
@@ -391,9 +378,9 @@ export const EpisodeQuiz = ({ episode }: EpisodeQuizProps) => {
                   <div className="w-full max-w-4xl">
                     <div className="golden-border">
                       <div className="p-4 bg-card backdrop-blur-sm rounded-xl">
-                        <p className="text-gray-300 text-center wrap-break-word whitespace-pre-line">
+                        <div className="quiz-question wrap-break-word">
                           {currentQuestion.questionExtraText}
-                        </p>
+                        </div>
                       </div>
                     </div>
                   </div>

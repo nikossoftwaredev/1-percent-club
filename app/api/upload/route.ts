@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { uploadFile } from "@/server-actions/upload-file";
+import { uploadFile } from "@/lib/files/upload";
 
 // Allowed image types
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];

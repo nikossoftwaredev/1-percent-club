@@ -358,7 +358,7 @@ export const QuestionsManager = ({
                             onClick={(e) => e.stopPropagation()}
                           >
                             <Link
-                              href={`${quizUrl}?question=${getQuizPosition(question.id)}`}
+                              href={`${quizUrl}/question/${getQuizPosition(question.id)}`}
                               target="_blank"
                             >
                               <Eye className="h-3 w-3" />
