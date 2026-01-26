@@ -26,7 +26,7 @@ const SeasonsPage = async ({ params }: SeasonsPageProps) => {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
         <div className="container flex h-14 items-center justify-between px-4">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="icon" asChild>
@@ -74,7 +74,7 @@ const SeasonsPage = async ({ params }: SeasonsPageProps) => {
                   className="group relative overflow-hidden transition-all duration-300 hover:shadow-xl hover:scale-[1.02] cursor-pointer"
                 >
                   {/* Season header with gradient */}
-                  <div className="relative h-32 bg-gradient-to-br from-primary/80 to-primary flex items-center justify-center">
+                  <div className="relative h-32 bg-linear-to-br from-primary/80 to-primary flex items-center justify-center">
                     <span className="text-6xl font-bold text-white/20">
                       {season.number}
                     </span>
@@ -95,7 +95,7 @@ const SeasonsPage = async ({ params }: SeasonsPageProps) => {
                     </div>
 
                     {/* Season title overlay */}
-                    <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent">
+                    <div className="absolute bottom-0 left-0 right-0 p-4 bg-linear-to-t from-black/60 to-transparent">
                       <h2 className="text-xl font-bold text-white">
                         Season {season.number}
                       </h2>

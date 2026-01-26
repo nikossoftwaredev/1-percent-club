@@ -1,14 +1,16 @@
-import { setRequestLocale } from "next-intl/server";
-import { BasePageProps } from "@/types/page-props";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Link } from "@/lib/i18n/navigation";
-import { ThemeSwitcher } from "@/components/examples/ThemeSwitcher";
-import { LoginButton } from "@/components/examples/login-button";
-import { LanguageSwitcher } from "@/components/examples/language-switcher";
 import { ArrowLeft, Play, Tv } from "lucide-react";
+import { setRequestLocale } from "next-intl/server";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { LanguageSwitcher } from "@/components/examples/language-switcher";
+import { LoginButton } from "@/components/examples/login-button";
+import { ThemeSwitcher } from "@/components/examples/ThemeSwitcher";
+import { cn } from "@/lib/general/utils";
+import { Link } from "@/lib/i18n/navigation";
 import { getCountries } from "@/server-actions/countries";
+import { BasePageProps } from "@/types/page-props";
 
 const CountriesPage = async ({ params }: BasePageProps) => {
   const { locale } = await params;
@@ -18,7 +20,7 @@ const CountriesPage = async ({ params }: BasePageProps) => {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
         <div className="container flex h-14 items-center justify-between px-4">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="icon" asChild>
@@ -54,14 +56,15 @@ const CountriesPage = async ({ params }: BasePageProps) => {
               {countries.map((country) => (
                 <Card
                   key={country.id}
-                  className={`group relative overflow-hidden transition-all duration-300 ${
+                  className={cn(
+                    "group relative overflow-hidden transition-all duration-300",
                     country.isActive
                       ? "hover:shadow-xl hover:scale-[1.02] cursor-pointer"
                       : "opacity-60 cursor-not-allowed"
-                  }`}
+                  )}
                 >
                   {/* Flag Image */}
-                  <div className="relative aspect-[16/10] overflow-hidden bg-muted">
+                  <div className="relative aspect-16/10 overflow-hidden bg-muted">
                     {country.flagImage ? (
                       <img
                         src={country.flagImage}
@@ -69,7 +72,7 @@ const CountriesPage = async ({ params }: BasePageProps) => {
                         className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted to-muted-foreground/20">
+                      <div className="w-full h-full flex items-center justify-center bg-linear-to-br from-muted to-muted-foreground/20">
                         <span className="text-6xl font-bold text-muted-foreground/30">
                           {country.code}
                         </span>
@@ -77,7 +80,7 @@ const CountriesPage = async ({ params }: BasePageProps) => {
                     )}
 
                     {/* Overlay gradient */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+                    <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/20 to-transparent" />
 
                     {/* Season badge */}
                     <div className="absolute top-3 right-3">

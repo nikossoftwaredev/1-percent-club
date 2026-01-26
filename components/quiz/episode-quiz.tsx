@@ -9,11 +9,10 @@ import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/general/utils";
 import { useRouter } from "@/lib/i18n/navigation";
-import { getDifficultyLabel } from "@/lib/quiz/difficulty";
+import { getDifficultyLabel, ANSWER_LETTERS } from "@/lib/quiz/difficulty";
 import { EpisodeForQuiz } from "@/server-actions/episodes";
 
 const DEFAULT_TIME = 30;
-const ANSWER_LETTERS = ["A", "B", "C", "D", "E", "F", "G", "H"];
 
 // Common styles
 const BACKGROUND_STYLES = {
@@ -54,7 +53,7 @@ const getLetterBadgeClasses = (
   showExplanation: boolean,
 ) => {
   const baseClasses =
-    "w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg shrink-0 bg-gradient-to-br text-black";
+    "w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg shrink-0 bg-linear-to-br text-black";
 
   if (!showExplanation) return cn(baseClasses, "from-yellow-400 to-orange-500");
   if (isCorrect) return cn(baseClasses, "from-green-400 to-green-600");
@@ -479,7 +478,7 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
                                   <div className="absolute top-1 left-1">
                                     <div
                                       className={cn(
-                                        "w-6 h-6 rounded-full flex items-center justify-center font-bold text-sm shrink-0 bg-gradient-to-br text-black",
+                                        "w-6 h-6 rounded-full flex items-center justify-center font-bold text-sm shrink-0 bg-linear-to-br text-black",
                                         !showExplanation && "from-yellow-400 to-orange-500",
                                         showExplanation && answer.isCorrect && "from-green-400 to-green-600",
                                         showExplanation && isSelectedIncorrect && "from-red-400 to-red-600",

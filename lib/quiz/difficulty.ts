@@ -1,6 +1,6 @@
 // Using string literal types to match Prisma enum values
 // This avoids importing database types in client components
-type DifficultyLevel =
+export type DifficultyLevel =
   | "NINETY"
   | "EIGHTY"
   | "SEVENTY"

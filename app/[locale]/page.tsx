@@ -14,7 +14,7 @@ const Home = async ({ params }: BasePageProps) => {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
         <div className="container flex h-16 items-center justify-between px-4">
           <Link href="/" className="flex items-center">
             <Image
@@ -36,7 +36,7 @@ const Home = async ({ params }: BasePageProps) => {
 
       <main className="flex-1 flex flex-col">
         {/* Hero Section */}
-        <section className="relative flex-1 flex items-center justify-center px-4 py-20 bg-gradient-to-br from-blue-950 via-purple-950 to-blue-950">
+        <section className="relative flex-1 flex items-center justify-center px-4 py-20 bg-linear-to-br from-blue-950 via-purple-950 to-blue-950">
           <div className="max-w-4xl mx-auto text-center space-y-8">
             <div className="space-y-6">
               <div className="flex justify-center">
@@ -77,7 +77,7 @@ const Home = async ({ params }: BasePageProps) => {
             {/* Features Grid */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 pt-12">
               <div className="flex flex-col items-center space-y-2">
-                <div className="p-3 rounded-full bg-gradient-to-br from-yellow-400/20 to-orange-500/20 border border-yellow-500/30">
+                <div className="p-3 rounded-full bg-linear-to-br from-yellow-400/20 to-orange-500/20 border border-yellow-500/30">
                   <Brain className="h-6 w-6 text-yellow-400" />
                 </div>
                 <h3 className="font-semibold text-white">Challenge Your Mind</h3>
@@ -87,7 +87,7 @@ const Home = async ({ params }: BasePageProps) => {
               </div>
 
               <div className="flex flex-col items-center space-y-2">
-                <div className="p-3 rounded-full bg-gradient-to-br from-yellow-400/20 to-orange-500/20 border border-yellow-500/30">
+                <div className="p-3 rounded-full bg-linear-to-br from-yellow-400/20 to-orange-500/20 border border-yellow-500/30">
                   <Users className="h-6 w-6 text-yellow-400" />
                 </div>
                 <h3 className="font-semibold text-white">Compete Globally</h3>
@@ -97,7 +97,7 @@ const Home = async ({ params }: BasePageProps) => {
               </div>
 
               <div className="flex flex-col items-center space-y-2">
-                <div className="p-3 rounded-full bg-gradient-to-br from-yellow-400/20 to-orange-500/20 border border-yellow-500/30">
+                <div className="p-3 rounded-full bg-linear-to-br from-yellow-400/20 to-orange-500/20 border border-yellow-500/30">
                   <TrendingUp className="h-6 w-6 text-yellow-400" />
                 </div>
                 <h3 className="font-semibold text-white">Track Progress</h3>
@@ -107,7 +107,7 @@ const Home = async ({ params }: BasePageProps) => {
               </div>
 
               <div className="flex flex-col items-center space-y-2">
-                <div className="p-3 rounded-full bg-gradient-to-br from-yellow-400/20 to-orange-500/20 border border-yellow-500/30">
+                <div className="p-3 rounded-full bg-linear-to-br from-yellow-400/20 to-orange-500/20 border border-yellow-500/30">
                   <Trophy className="h-6 w-6 text-yellow-400" />
                 </div>
                 <h3 className="font-semibold text-white">Join the Elite</h3>
