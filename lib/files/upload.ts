@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 
 // S3-compatible storage configuration
 const s3Client = new S3Client({
@@ -36,4 +36,20 @@ export const uploadFile = async (
   const publicUrl = `https://${projectRef}.supabase.co/storage/v1/object/public/${IMAGES_BUCKET}/${fileName}`;
 
   return publicUrl;
+};
+
+export const deleteFile = async (fileUrl: string): Promise<void> => {
+  // Extract filename from URL
+  // Format: https://<project-ref>.supabase.co/storage/v1/object/public/images/<filename>
+  const urlParts = fileUrl.split(`/public/${IMAGES_BUCKET}/`);
+  if (urlParts.length !== 2) throw new Error("Invalid file URL format");
+
+  const fileName = urlParts[1];
+
+  const command = new DeleteObjectCommand({
+    Bucket: IMAGES_BUCKET,
+    Key: fileName,
+  });
+
+  await s3Client.send(command);
 };

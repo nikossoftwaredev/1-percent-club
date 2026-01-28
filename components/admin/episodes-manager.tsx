@@ -41,7 +41,7 @@ export const EpisodesManager = ({
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-semibold">Episode {episode.number}</h3>
               <Badge variant="outline">
-                {episode._count.questions} questions
+                {episode.filledQuestionsCount}/{episode._count.questions}
               </Badge>
             </div>
 

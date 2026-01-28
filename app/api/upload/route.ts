@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { uploadFile } from "@/lib/files/upload";
+import { uploadFile, deleteFile } from "@/lib/files/upload";
 
 // Allowed image types
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
@@ -50,6 +50,27 @@ export const POST = async (request: NextRequest) => {
     const message = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
       { error: `Failed to upload file: ${message}` },
+      { status: 500 },
+    );
+  }
+};
+
+export const DELETE = async (request: NextRequest) => {
+  try {
+    const { url } = await request.json();
+
+    if (!url || typeof url !== "string") {
+      return NextResponse.json({ error: "No URL provided" }, { status: 400 });
+    }
+
+    await deleteFile(url);
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Delete error:", error);
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return NextResponse.json(
+      { error: `Failed to delete file: ${message}` },
       { status: 500 },
     );
   }

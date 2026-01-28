@@ -11,6 +11,7 @@ export interface EpisodeWithQuestionCount {
   _count: {
     questions: number;
   };
+  filledQuestionsCount: number;
 }
 
 export interface QuizQuestion {
@@ -47,15 +48,28 @@ export interface EpisodeForQuiz {
 }
 
 export const getEpisodes = async (seasonId: string): Promise<EpisodeWithQuestionCount[]> => {
-  return prisma.episode.findMany({
+  const episodes = await prisma.episode.findMany({
     where: { seasonId },
     include: {
       _count: {
         select: { questions: true },
       },
+      questions: {
+        select: { questionText: true },
+      },
     },
     orderBy: { number: "asc" },
   });
+
+  return episodes.map((episode) => ({
+    id: episode.id,
+    number: episode.number,
+    title: episode.title,
+    airDate: episode.airDate,
+    isActive: episode.isActive,
+    _count: episode._count,
+    filledQuestionsCount: episode.questions.filter((q) => q.questionText.trim() !== "").length,
+  }));
 };
 
 export const getSeasonWithCountry = async (seasonId: string) => {
@@ -65,6 +79,53 @@ export const getSeasonWithCountry = async (seasonId: string) => {
       country: true,
     },
   });
+};
+
+export const getEpisodesByCountryAndSeason = async (
+  countrySlug: string,
+  seasonNumber: number
+) => {
+  const country = await prisma.country.findUnique({
+    where: { slug: countrySlug },
+  });
+
+  if (!country) return null;
+
+  const season = await prisma.season.findFirst({
+    where: {
+      countryId: country.id,
+      number: seasonNumber,
+    },
+  });
+
+  if (!season) return null;
+
+  const episodes = await prisma.episode.findMany({
+    where: { seasonId: season.id },
+    include: {
+      _count: {
+        select: { questions: true },
+      },
+      questions: {
+        select: { questionText: true },
+      },
+    },
+    orderBy: { number: "asc" },
+  });
+
+  return {
+    country,
+    season,
+    episodes: episodes.map((episode) => ({
+      id: episode.id,
+      number: episode.number,
+      title: episode.title,
+      airDate: episode.airDate,
+      isActive: episode.isActive,
+      totalQuestions: episode._count.questions,
+      filledQuestionsCount: episode.questions.filter((q) => q.questionText.trim() !== "").length,
+    })),
+  };
 };
 
 export const getEpisodeForQuiz = async (

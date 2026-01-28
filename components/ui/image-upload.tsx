@@ -96,7 +96,18 @@ export const ImageUpload = ({
     setIsActive(true);
   };
 
-  const handleRemove = () => {
+  const handleRemove = async () => {
+    if (value) {
+      try {
+        await fetch("/api/upload", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: value }),
+        });
+      } catch (err) {
+        console.error("Failed to delete file:", err);
+      }
+    }
     onChange("");
     onRemove?.();
   };

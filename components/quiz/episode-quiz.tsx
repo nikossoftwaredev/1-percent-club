@@ -99,12 +99,12 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
   // Calculate timer progress (percentage of time remaining)
   const timerProgress = (timeLeft / DEFAULT_TIME) * 100;
 
-  // Update URL when question changes
+  // Update URL when question changes (use orderInShow for URL)
   useEffect(() => {
-    const questionNumber = currentQuestionIndex + 1;
+    const questionOrderInShow = currentQuestion?.orderInShow ?? currentQuestionIndex + 1;
     const basePath = `/countries/${episode.season.country.slug}/seasons/${episode.season.number}/episodes/${episode.number}/question`;
-    router.replace(`${basePath}/${questionNumber}`);
-  }, [currentQuestionIndex, episode.season.country.slug, episode.season.number, episode.number, router]);
+    router.replace(`${basePath}/${questionOrderInShow}`);
+  }, [currentQuestionIndex, currentQuestion?.orderInShow, episode.season.country.slug, episode.season.number, episode.number, router]);
 
   // Timer effect - just for visual effect, no actions when it ends
   useEffect(() => {
@@ -169,8 +169,9 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
 
   const handleShare = async () => {
     const questionUrl = window.location.href;
+    const questionNumber = currentQuestion?.orderInShow ?? currentQuestionIndex + 1;
     const shareData = {
-      title: `1% Club - Question ${currentQuestionIndex + 1}`,
+      title: `1% Club - Question ${questionNumber}`,
       text: `Can you answer this question? Only ${difficultyPercentage}% of people got it right!`,
       url: questionUrl,
     };
@@ -283,7 +284,7 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
           {/* Top Header - Question Number */}
           <div className="pt-12 pb-12 shrink-0">
             <h1 className="text-6xl md:text-7xl lg:text-8xl font-black text-center text-yellow-400 tracking-wider uppercase" style={{ fontWeight: 950, letterSpacing: '0.05em', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
-              QUESTION {String(currentQuestionIndex + 1).padStart(2, '0')}
+              QUESTION {String(currentQuestion?.orderInShow ?? currentQuestionIndex + 1).padStart(2, '0')}
             </h1>
           </div>
 
@@ -450,7 +451,7 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
                               "golden-border-thin transition-all transform hover:scale-105 cursor-pointer",
                               isSelected && !showExplanation && "scale-105",
                               "disabled:hover:scale-100 disabled:cursor-not-allowed",
-                              answer.answerImage ? "aspect-square" : "min-h-[80px]"
+                              answer.answerImage ? "aspect-square" : "min-h-20"
                             )}
                           >
                             <div
@@ -474,15 +475,17 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
                                     alt={`Answer ${ANSWER_LETTERS[index]}`}
                                     className="w-full h-full object-cover"
                                   />
-                                  {/* Letter Badge - Positioned absolute */}
-                                  <div className="absolute top-1 left-1">
+                                  {/* Black gradient overlay */}
+                                  <div className="absolute inset-0 bg-linear-to-b from-black/50 via-transparent to-black/30" />
+                                  {/* Letter Badge - Top left inside */}
+                                  <div className="absolute top-2 left-2">
                                     <div
                                       className={cn(
-                                        "w-6 h-6 rounded-full flex items-center justify-center font-bold text-sm shrink-0 bg-linear-to-br text-black",
-                                        !showExplanation && "from-yellow-400 to-orange-500",
-                                        showExplanation && answer.isCorrect && "from-green-400 to-green-600",
-                                        showExplanation && isSelectedIncorrect && "from-red-400 to-red-600",
-                                        showExplanation && !answer.isCorrect && !isSelectedIncorrect && "from-yellow-400 to-orange-500"
+                                        "w-8 h-8 rounded-md flex items-center justify-center font-bold text-lg shadow-lg",
+                                        !showExplanation && "bg-black/80 text-white",
+                                        showExplanation && answer.isCorrect && "bg-green-500 text-black",
+                                        showExplanation && isSelectedIncorrect && "bg-red-500 text-white",
+                                        showExplanation && !answer.isCorrect && !isSelectedIncorrect && "bg-black/80 text-white"
                                       )}
                                     >
                                       {ANSWER_LETTERS[index]}
@@ -511,8 +514,8 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
                               {showExplanation && isSelectedIncorrect && (
                                 <svg
                                   className={cn(
-                                    "text-red-400 absolute",
-                                    answer.answerImage ? "w-6 h-6 top-1 right-1" : "w-8 h-8 right-4"
+                                    "text-red-500 absolute drop-shadow-lg",
+                                    answer.answerImage ? "w-8 h-8 top-2 right-2" : "w-8 h-8 right-4"
                                   )}
                                   fill="none"
                                   stroke="currentColor"

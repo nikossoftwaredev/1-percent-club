@@ -29,10 +29,12 @@ export const generateMetadata = async ({
   const { country, season, episode, question } = await params;
   const seasonNumber = parseInt(season, 10);
   const episodeNumber = parseInt(episode, 10);
-  const questionIndex = parseInt(question, 10) - 1;
+  const questionNumber = parseInt(question, 10);
 
   const episodeData = await getEpisodeData(country, seasonNumber, episodeNumber);
-  const questionData = episodeData?.questions[questionIndex];
+  const questionData = episodeData?.questions.find(
+    (q) => q.orderInShow === questionNumber
+  );
   const difficulty = questionData
     ? getDifficultyLabel(questionData.difficulty)
     : "50%";
@@ -75,15 +77,19 @@ const QuestionPage = async ({ params }: QuestionPageProps) => {
     notFound();
   }
 
-  // Validate question number is within range
-  if (questionNumber < 1 || questionNumber > episodeData.questions.length) {
+  // Find the question by orderInShow
+  const questionIndex = episodeData.questions.findIndex(
+    (q) => q.orderInShow === questionNumber
+  );
+
+  if (questionIndex === -1) {
     notFound();
   }
 
   return (
     <EpisodeQuiz
       episode={episodeData}
-      initialQuestionIndex={questionNumber - 1}
+      initialQuestionIndex={questionIndex}
     />
   );
 };
