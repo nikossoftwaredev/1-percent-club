@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Share2 } from "lucide-react";
+import { Share2, RotateCcw, ArrowRight, LogOut, CheckCircle, Trophy } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +14,6 @@ import { EpisodeForQuiz } from "@/server-actions/episodes";
 
 const DEFAULT_TIME = 30;
 
-// Common styles
 const BACKGROUND_STYLES = {
   backgroundImage: `url('/background.jpg')`,
   backgroundPosition: "center",
@@ -25,9 +24,8 @@ const GOLDEN_BUTTON_STYLES =
   "bg-linear-to-r from-yellow-400 to-orange-500 text-black font-bold hover:from-yellow-500 hover:to-orange-600";
 
 const OUTLINE_BUTTON_STYLES =
-  "border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/10";
+  "border-yellow-500/30 text-yellow-400 hover:bg-yellow-500/10";
 
-// Helper functions
 const getAnswerButtonClasses = (
   isSelected: boolean,
   isCorrect: boolean,
@@ -36,29 +34,15 @@ const getAnswerButtonClasses = (
   index: number,
 ) => {
   if (!showExplanation) {
-    if (isSelected) return "bg-linear-to-r from-yellow-500/20 to-orange-500/20";
+    if (isSelected) return "bg-linear-to-r from-yellow-500/20 to-orange-500/20 border-yellow-500/30";
     return "bg-card";
   }
 
-  if (isCorrect) return "bg-linear-to-r from-green-500/20 to-green-600/20";
+  if (isCorrect) return "bg-linear-to-r from-green-500/15 to-green-600/15 border-green-500/30";
 
-  if (selectedAnswer === index && !isCorrect) return "bg-linear-to-r from-red-500/20 to-red-600/20";
+  if (selectedAnswer === index && !isCorrect) return "bg-linear-to-r from-red-500/15 to-red-600/15 border-red-500/30";
 
-  return "bg-card";
-};
-
-const getLetterBadgeClasses = (
-  isCorrect: boolean,
-  isSelectedIncorrect: boolean,
-  showExplanation: boolean,
-) => {
-  const baseClasses =
-    "w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg shrink-0 bg-linear-to-br text-black";
-
-  if (!showExplanation) return cn(baseClasses, "from-yellow-400 to-orange-500");
-  if (isCorrect) return cn(baseClasses, "from-green-400 to-green-600");
-  if (isSelectedIncorrect) return cn(baseClasses, "from-red-400 to-red-600");
-  return cn(baseClasses, "from-yellow-400 to-orange-500");
+  return "bg-card opacity-50";
 };
 
 interface EpisodeQuizProps {
@@ -84,7 +68,6 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
   const currentQuestion = questions[currentQuestionIndex];
   const totalQuestions = questions.length;
 
-  // Get difficulty percentage
   const difficultyPercentage = currentQuestion
     ? parseInt(
         getDifficultyLabel(
@@ -93,29 +76,21 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
       )
     : 50;
 
-  // Determine if question is text input type (single answer = text input)
   const isTextInputQuestion = currentQuestion?.answers.length === 1;
-
-  // Calculate timer progress (percentage of time remaining)
   const timerProgress = (timeLeft / DEFAULT_TIME) * 100;
 
-  // Update URL when question changes (use orderInShow for URL)
   useEffect(() => {
     const questionOrderInShow = currentQuestion?.orderInShow ?? currentQuestionIndex + 1;
     const basePath = `/countries/${episode.season.country.slug}/seasons/${episode.season.number}/episodes/${episode.number}/question`;
     router.replace(`${basePath}/${questionOrderInShow}`);
   }, [currentQuestionIndex, currentQuestion?.orderInShow, episode.season.country.slug, episode.season.number, episode.number, router]);
 
-  // Timer effect - just for visual effect, no actions when it ends
   useEffect(() => {
     if (showExplanation || isQuizComplete || totalQuestions === 0) return;
 
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
-        if (prev <= 1) {
-          // Timer ends but nothing happens - just visual effect
-          return 0;
-        }
+        if (prev <= 1) return 0;
         return prev - 1;
       });
     }, 1000);
@@ -180,13 +155,11 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
       try {
         await navigator.share(shareData);
       } catch (err) {
-        // User cancelled or share failed - copy to clipboard as fallback
         if (err instanceof Error && err.name !== "AbortError") {
           await navigator.clipboard.writeText(questionUrl);
         }
       }
     } else {
-      // Fallback: copy to clipboard
       await navigator.clipboard.writeText(questionUrl);
     }
   };
@@ -202,13 +175,14 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
         className="h-screen w-screen overflow-hidden relative bg-cover bg-center bg-no-repeat flex items-center justify-center"
         style={BACKGROUND_STYLES}
       >
-        <div className="absolute inset-0 bg-black/40" />
+        <div className="absolute inset-0 bg-black/50" />
+        <div className="noise-overlay absolute inset-0" />
         <div className="relative z-10 golden-border">
-          <div className="p-8 bg-card backdrop-blur-sm rounded-xl text-center">
-            <h1 className="text-2xl font-bold mb-4 text-white">
+          <div className="p-10 bg-card backdrop-blur-sm rounded-xl text-center">
+            <h1 className="text-2xl font-bold mb-4 text-foreground">
               No Questions Available
             </h1>
-            <p className="text-gray-300 mb-6">
+            <p className="text-muted-foreground mb-6 text-sm">
               This episode does not have any questions yet.
             </p>
             <Button onClick={handleBackToEpisodes} className={GOLDEN_BUTTON_STYLES}>
@@ -220,6 +194,7 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
     );
   }
 
+  // Quiz Complete
   if (isQuizComplete) {
     const successRate = Math.round((score / totalQuestions) * 100);
 
@@ -228,41 +203,62 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
         className="h-screen w-screen overflow-hidden relative bg-cover bg-center bg-no-repeat flex items-center justify-center"
         style={BACKGROUND_STYLES}
       >
-        <div className="absolute inset-0 bg-black/40" />
-        <div className="relative z-10 golden-border max-w-2xl w-full mx-4">
-          <div className="p-12 bg-card backdrop-blur-sm rounded-xl text-center">
-            <h1 className="text-4xl font-bold mb-8 text-transparent bg-clip-text bg-linear-to-r from-yellow-400 to-orange-500">
-              Episode Complete!
-            </h1>
-            <div className="mb-10">
-              <p className="text-7xl font-bold text-yellow-400 mb-4">
-                {score}/{totalQuestions}
-              </p>
-              <p className="text-gray-300 text-xl">Questions Correct</p>
+        <div className="absolute inset-0 bg-black/60" />
+        <div className="noise-overlay absolute inset-0" />
+
+        {/* Glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-150 h-150 rounded-full bg-yellow-500/5 blur-[100px]" />
+
+        <div className="relative z-10 golden-border max-w-lg w-full mx-4">
+          <div className="p-10 md:p-14 bg-card backdrop-blur-sm rounded-xl text-center">
+            {/* Trophy icon */}
+            <div className="inline-flex p-4 rounded-full bg-linear-to-br from-yellow-400/10 to-orange-500/10 border border-yellow-500/20 mb-6">
+              <Trophy className="h-8 w-8 text-yellow-400" />
             </div>
 
+            <h1 className="golden-shimmer text-3xl md:text-4xl font-black mb-2">
+              Episode Complete
+            </h1>
+
+            <div className="h-px bg-linear-to-r from-transparent via-yellow-500/20 to-transparent my-8" />
+
+            {/* Score */}
+            <div className="mb-8">
+              <p className="text-6xl font-black text-transparent bg-clip-text bg-linear-to-b from-yellow-400 to-orange-500 mb-2">
+                {score}/{totalQuestions}
+              </p>
+              <p className="text-sm text-muted-foreground tracking-wide">Questions Correct</p>
+            </div>
+
+            {/* Success Rate */}
             <div className="golden-border-thin mb-10">
-              <div className="p-6 bg-card rounded-lg">
-                <p className="text-gray-300 mb-2">Success Rate</p>
-                <p className="text-5xl font-bold text-transparent bg-clip-text bg-linear-to-r from-yellow-400 to-orange-500">
+              <div className="py-5 px-6 bg-card rounded-lg">
+                <p className="text-xs tracking-[0.2em] uppercase text-muted-foreground mb-1">
+                  Success Rate
+                </p>
+                <p className="text-4xl font-black text-transparent bg-clip-text bg-linear-to-r from-yellow-400 to-orange-500">
                   {successRate}%
                 </p>
               </div>
             </div>
 
+            {/* Actions */}
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Button
                 variant="outline"
                 onClick={handleBackToEpisodes}
                 className={OUTLINE_BUTTON_STYLES}
               >
-                Back to Episodes
+                <LogOut className="h-4 w-4" />
+                Episodes
               </Button>
               <Button
+                variant="outline"
                 onClick={() => window.location.reload()}
                 className={OUTLINE_BUTTON_STYLES}
               >
-                Play Again
+                <RotateCcw className="h-4 w-4" />
+                Replay
               </Button>
               <Button
                 onClick={() => router.push(
@@ -271,6 +267,7 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
                 className={GOLDEN_BUTTON_STYLES}
               >
                 Next Episode
+                <ArrowRight className="h-4 w-4" />
               </Button>
             </div>
           </div>
@@ -284,26 +281,44 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
       className="h-screen w-screen overflow-hidden relative bg-cover bg-center bg-no-repeat"
       style={BACKGROUND_STYLES}
     >
-      {/* Dark overlay for better text visibility */}
-      <div className="absolute inset-0 bg-black/40" />
+      <div className="absolute inset-0 bg-black/50" />
+      <div className="noise-overlay absolute inset-0" />
 
       <ScrollArea className="relative z-10 h-full w-full">
         <div className="flex flex-col max-w-7xl mx-auto">
-          {/* Top Header - Question Number */}
-          <div className="pt-12 pb-12 shrink-0">
-            <h1 className="text-6xl md:text-7xl lg:text-8xl font-black text-center text-yellow-400 tracking-wider uppercase" style={{ fontWeight: 950, letterSpacing: '0.05em', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+          {/* Question Header */}
+          <div className="pt-8 pb-6 shrink-0 text-center">
+            {/* Difficulty indicator */}
+            <p className="text-xs font-bold tracking-[0.3em] uppercase text-yellow-500/50 mb-2">
+              {difficultyPercentage}% can answer this
+            </p>
+            <h1
+              className="text-5xl md:text-6xl lg:text-7xl font-black text-center text-transparent bg-clip-text bg-linear-to-b from-yellow-400 to-orange-500 tracking-wider uppercase"
+              style={{ fontWeight: 950, letterSpacing: '0.05em' }}
+            >
               QUESTION {String(currentQuestion?.orderInShow ?? currentQuestionIndex + 1).padStart(2, '0')}
             </h1>
+            {/* Progress dots */}
+            <div className="flex items-center justify-center gap-1.5 mt-4">
+              {questions.map((_, idx) => (
+                <div
+                  key={idx}
+                  className={cn(
+                    "h-1 rounded-full transition-all",
+                    idx === currentQuestionIndex ? "w-6 bg-yellow-400" : "w-1.5 bg-white/15",
+                    idx < currentQuestionIndex && "w-1.5 bg-yellow-400/40",
+                  )}
+                />
+              ))}
+            </div>
           </div>
 
           {/* Main Content Area */}
-          <div className="flex flex-col items-center px-4 pb-12 space-y-6">
+          <div className="flex flex-col items-center px-4 pb-12 space-y-5">
             {/* Question Layout - Vertical or Horizontal */}
             {currentQuestion.layout === "HORIZONTAL" && currentQuestion.questionImage ? (
-              // Horizontal Layout - Text beside images
               <div className="w-full max-w-6xl">
                 <div className="flex flex-col lg:flex-row gap-6 lg:items-stretch">
-                  {/* Question Text */}
                   <div className="flex-1">
                     <div className="golden-border h-full">
                       <div className="p-6 bg-card backdrop-blur-sm rounded-xl h-full flex items-center justify-center">
@@ -314,7 +329,6 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
                     </div>
                   </div>
 
-                  {/* Question Images */}
                   <div className="flex-1">
                     <div className="flex flex-col gap-4 h-full">
                       <div className="flex flex-col md:flex-row gap-4 flex-1">
@@ -332,7 +346,6 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
                           </div>
                         ))}
                       </div>
-                      {/* Extra Text for Horizontal Layout */}
                       {currentQuestion.questionExtraText && (
                         <div className="golden-border">
                           <div className="p-4 bg-card backdrop-blur-sm rounded-xl">
@@ -347,9 +360,7 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
                 </div>
               </div>
             ) : (
-              // Vertical Layout (default) - Text above images
               <>
-                {/* Question Text Card */}
                 <div className="w-full max-w-4xl">
                   <div className="golden-border">
                     <div className="p-6 bg-card backdrop-blur-sm rounded-xl">
@@ -360,7 +371,6 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
                   </div>
                 </div>
 
-                {/* Question Images Cards */}
                 {currentQuestion.questionImage && (
                   <div className="w-full max-w-4xl">
                     <div className="flex flex-col md:flex-row gap-4">
@@ -381,7 +391,6 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
                   </div>
                 )}
 
-                {/* Extra Text for Vertical Layout */}
                 {currentQuestion.questionExtraText && (
                   <div className="w-full max-w-4xl">
                     <div className="golden-border">
@@ -401,7 +410,6 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
               <div className="golden-border">
                 <div className="p-6 bg-card backdrop-blur-sm rounded-xl">
                   {isTextInputQuestion ? (
-                    /* Text Input Answer */
                     <div className="space-y-4">
                       <Input
                         value={textAnswer}
@@ -425,16 +433,19 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
                       {showExplanation && (
                         <div
                           className={cn(
-                            "p-4 rounded-lg border-2",
+                            "p-4 rounded-xl border",
                             isTextAnswerCorrect
-                              ? "bg-green-500/10 border-green-500"
-                              : "bg-red-500/10 border-red-500"
+                              ? "bg-green-500/10 border-green-500/30"
+                              : "bg-red-500/10 border-red-500/30"
                           )}
                         >
-                          <p className="font-bold text-white">
-                            {isTextAnswerCorrect ? "Correct!" : "Incorrect"}
-                          </p>
-                          <p className="text-gray-300 mt-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            {isTextAnswerCorrect && <CheckCircle className="h-4 w-4 text-green-400" />}
+                            <p className="font-bold text-foreground text-sm">
+                              {isTextAnswerCorrect ? "Correct!" : "Incorrect"}
+                            </p>
+                          </div>
+                          <p className="text-muted-foreground text-sm">
                             The correct answer is:{" "}
                             <span className="font-bold text-yellow-400">
                               {currentQuestion.answers[0].answerText}
@@ -444,7 +455,6 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
                       )}
                     </div>
                   ) : (
-                    /* Multiple Choice Answers */
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-3 w-full">
                       {currentQuestion.answers.map((answer, index) => {
                         const isSelected = selectedAnswer === index;
@@ -456,14 +466,14 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
                             onClick={() => handleAnswerSelect(index)}
                             disabled={showExplanation}
                             className={cn(
-                              "golden-border-thin transition-all transform hover:scale-105 cursor-pointer min-h-20",
-                              isSelected && !showExplanation && "scale-105",
-                              "disabled:hover:scale-100 disabled:cursor-not-allowed",
+                              "answer-card golden-border-thin cursor-pointer min-h-20",
+                              isSelected && !showExplanation && "scale-[1.03]",
+                              "disabled:cursor-not-allowed",
                             )}
                           >
                             <div
                               className={cn(
-                                "rounded-lg flex relative overflow-hidden h-full items-center justify-center",
+                                "rounded-lg flex relative overflow-hidden h-full items-center justify-center transition-colors",
                                 answer.answerImage ? "p-0" : "p-4 pl-14",
                                 getAnswerButtonClasses(
                                   isSelected,
@@ -474,22 +484,21 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
                                 )
                               )}
                             >
-                              {/* Letter Badge - Always top left */}
+                              {/* Letter Badge */}
                               <div className="absolute top-2 left-2 z-10">
                                 <div
                                   className={cn(
-                                    "w-8 h-8 rounded-md flex items-center justify-center font-bold text-lg shadow-lg",
+                                    "w-8 h-8 rounded-md flex items-center justify-center font-bold text-sm shadow-lg transition-colors",
                                     !showExplanation && "bg-black/80 text-white",
                                     showExplanation && answer.isCorrect && "bg-green-500 text-black",
                                     showExplanation && isSelectedIncorrect && "bg-red-500 text-white",
-                                    showExplanation && !answer.isCorrect && !isSelectedIncorrect && "bg-black/80 text-white"
+                                    showExplanation && !answer.isCorrect && !isSelectedIncorrect && "bg-black/80 text-white/50"
                                   )}
                                 >
                                   {ANSWER_LETTERS[index]}
                                 </div>
                               </div>
 
-                              {/* Content - Image or Text */}
                               {answer.answerImage ? (
                                 <>
                                   <img
@@ -505,10 +514,17 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
                                 </span>
                               )}
 
-                              {/* Incorrect Indicator */}
+                              {/* Correct check */}
+                              {showExplanation && answer.isCorrect && (
+                                <div className="absolute top-2 right-2 z-10">
+                                  <CheckCircle className="h-5 w-5 text-green-400 drop-shadow-lg" />
+                                </div>
+                              )}
+
+                              {/* Incorrect X */}
                               {showExplanation && isSelectedIncorrect && (
                                 <svg
-                                  className="text-red-500 absolute w-8 h-8 top-2 right-2 drop-shadow-lg z-10"
+                                  className="text-red-500 absolute w-6 h-6 top-2.5 right-2.5 drop-shadow-lg z-10"
                                   fill="none"
                                   stroke="currentColor"
                                   viewBox="0 0 24 24"
@@ -528,15 +544,17 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
                     </div>
                   )}
 
-                  {/* Linear Progress Timer */}
+                  {/* Difficulty / Timer bar */}
                   <div className="mt-6">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm text-gray-400">Difficulty</span>
-                      <span className="text-sm font-bold text-yellow-400">{difficultyPercentage}%</span>
+                      <span className="text-xs text-muted-foreground tracking-wide">
+                        Q{currentQuestionIndex + 1}/{totalQuestions}
+                      </span>
+                      <span className="text-xs font-bold text-yellow-400">{difficultyPercentage}%</span>
                     </div>
                     <Progress
                       value={timerProgress}
-                      className="h-2 bg-gray-600 [&>div]:bg-linear-to-r [&>div]:from-yellow-400 [&>div]:to-orange-500"
+                      className="h-1.5 bg-white/5 [&>div]:bg-linear-to-r [&>div]:from-yellow-400 [&>div]:to-orange-500"
                     />
                   </div>
 
@@ -545,19 +563,21 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
                     <div className="flex gap-2">
                       <Button
                         variant="outline"
+                        size="sm"
                         onClick={handleBackToEpisodes}
                         className={OUTLINE_BUTTON_STYLES}
                       >
-                        Exit Quiz
+                        <LogOut className="h-3.5 w-3.5" />
+                        Exit
                       </Button>
                       {showExplanation && (
                         <Button
                           variant="outline"
-                          size="icon"
+                          size="icon-sm"
                           onClick={handleShare}
                           className={OUTLINE_BUTTON_STYLES}
                         >
-                          <Share2 className="h-4 w-4" />
+                          <Share2 className="h-3.5 w-3.5" />
                         </Button>
                       )}
                     </div>
@@ -582,6 +602,7 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
                         {currentQuestionIndex < totalQuestions - 1
                           ? "Next Question"
                           : "Finish Quiz"}
+                        <ArrowRight className="h-4 w-4" />
                       </Button>
                     )}
                   </div>
@@ -594,10 +615,11 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
               <div className="w-full max-w-4xl">
                 <div className="golden-border">
                   <div className="p-6 bg-card backdrop-blur-sm rounded-xl">
-                    <p className="font-bold mb-2 text-yellow-400">
-                      Explanation:
+                    <p className="font-bold mb-3 text-yellow-400 text-sm tracking-wide uppercase">
+                      Explanation
                     </p>
-                    <p className="text-gray-300 wrap-break-word whitespace-pre-line">
+                    <div className="h-px bg-linear-to-r from-yellow-500/20 to-transparent mb-3" />
+                    <p className="text-muted-foreground wrap-break-word whitespace-pre-line leading-relaxed">
                       {currentQuestion.explanation}
                     </p>
                   </div>
