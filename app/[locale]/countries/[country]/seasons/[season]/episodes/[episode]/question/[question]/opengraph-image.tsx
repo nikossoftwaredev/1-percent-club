@@ -65,7 +65,7 @@ const OGImage = async ({ params }: OGImageProps) => {
             letterSpacing: "0.02em",
           }}
         >
-          {`THE ${difficultyLabel} QUESTION`}
+          {`${difficultyLabel} QUESTION`}
         </div>
 
         {/* Content Area */}
@@ -149,7 +149,7 @@ const OGImage = async ({ params }: OGImageProps) => {
                     style={{
                       width: "100%",
                       height: "100%",
-                      objectFit: "cover",
+                      objectFit: "contain",
                     }}
                   />
                 )}
