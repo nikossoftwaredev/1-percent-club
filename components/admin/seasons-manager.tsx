@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { Plus, Pencil, Trash2, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -147,9 +147,9 @@ export const SeasonsManager = ({
       </div>
 
       {seasons.length === 0 ? (
-        <Card>
-          <CardContent className="py-8">
-            <div className="text-center text-muted-foreground">
+        <Card className="border-white/6">
+          <CardContent className="py-12">
+            <div className="text-center text-muted-foreground text-sm">
               No seasons yet. Add your first season to get started.
             </div>
           </CardContent>
@@ -159,26 +159,42 @@ export const SeasonsManager = ({
           {seasons.map((season) => (
             <Card
               key={season.id}
-              className="group hover:shadow-md transition-shadow"
+              className="group border-white/6 card-glow transition-all duration-300"
             >
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg">Season {season.number}</CardTitle>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
+                    <span className="text-2xl font-bold text-yellow-400/80">
+                      {season.number}
+                    </span>
+                    <span className="text-sm text-muted-foreground">
+                      Season
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
                     {season.year && (
-                      <Badge variant="outline">{season.year}</Badge>
+                      <Badge variant="outline" className="border-white/10 text-xs text-muted-foreground">
+                        {season.year}
+                      </Badge>
                     )}
-                    <Badge variant={season.isFinished ? "secondary" : "default"}>
+                    <Badge
+                      variant="outline"
+                      className={
+                        season.isFinished
+                          ? "border-emerald-500/30 text-emerald-400 text-xs"
+                          : "border-yellow-500/30 text-yellow-400 text-xs"
+                      }
+                    >
                       {season.isFinished ? "Finished" : "Ongoing"}
                     </Badge>
                   </div>
                 </div>
-              </CardHeader>
-              <CardContent className="pt-2">
-                <p className="text-sm text-muted-foreground mb-3">
+
+                <p className="text-xs text-muted-foreground mb-3">
                   {season._count.episodes} episode{season._count.episodes !== 1 ? "s" : ""}
                 </p>
-                <div className="flex items-center gap-1 pt-3 border-t">
+
+                <div className="flex items-center gap-1 pt-3 border-t border-white/6">
                   <Button variant="ghost" size="sm" className="flex-1" asChild>
                     <Link href={`/admin/countries/${countryId}/seasons/${season.id}`}>
                       Episodes

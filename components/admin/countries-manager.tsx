@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { Plus, Pencil, Trash2, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/lib/i18n/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -132,9 +132,9 @@ export const CountriesManager = ({ initialCountries }: CountriesManagerProps) =>
       </div>
 
       {countries.length === 0 ? (
-        <Card>
-          <CardContent className="py-8">
-            <div className="text-center text-muted-foreground">
+        <Card className="border-white/6">
+          <CardContent className="py-12">
+            <div className="text-center text-muted-foreground text-sm">
               No countries yet. Add your first country to get started.
             </div>
           </CardContent>
@@ -144,40 +144,37 @@ export const CountriesManager = ({ initialCountries }: CountriesManagerProps) =>
           {countries.map((country) => (
             <Card
               key={country.id}
-              className="group hover:shadow-md transition-shadow"
+              className="group border-white/6 card-glow transition-all duration-300"
             >
-              <CardHeader className="pb-2">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    {country.flagImage ? (
-                      <img
-                        src={country.flagImage}
-                        alt={`${country.name} flag`}
-                        className="h-10 w-14 rounded object-cover"
-                      />
-                    ) : (
-                      <div className="h-10 w-14 rounded bg-muted flex items-center justify-center text-muted-foreground text-xs">
-                        No image
-                      </div>
-                    )}
-                    <div>
-                      <CardTitle className="text-lg">{country.name}</CardTitle>
-                      <p className="text-sm text-muted-foreground">
-                        {country.code}
-                      </p>
+              <CardContent className="p-4">
+                <div className="flex items-start gap-3 mb-4">
+                  {country.flagImage ? (
+                    <img
+                      src={country.flagImage}
+                      alt={`${country.name} flag`}
+                      className="h-10 w-14 rounded border border-white/10 object-cover shrink-0"
+                    />
+                  ) : (
+                    <div className="h-10 w-14 rounded border border-white/10 bg-white/5 flex items-center justify-center text-muted-foreground text-[10px] uppercase shrink-0">
+                      N/A
                     </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold truncate">{country.name}</h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {country.code}
+                    </p>
                   </div>
                   <Badge
-                    variant={country._count.seasons > 0 ? "secondary" : "outline"}
-                    className="shrink-0"
+                    variant="outline"
+                    className="shrink-0 border-white/10 text-xs text-muted-foreground"
                   >
                     {country._count.seasons}{" "}
                     {country._count.seasons === 1 ? "season" : "seasons"}
                   </Badge>
                 </div>
-              </CardHeader>
-              <CardContent className="pt-2">
-                <div className="flex items-center gap-1 pt-3 border-t">
+
+                <div className="flex items-center gap-1 pt-3 border-t border-white/6">
                   <Button variant="ghost" size="sm" className="flex-1" asChild>
                     <Link href={`/admin/countries/${country.id}/seasons`}>
                       View Seasons

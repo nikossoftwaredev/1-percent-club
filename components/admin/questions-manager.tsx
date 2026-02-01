@@ -288,20 +288,45 @@ export const QuestionsManager = ({
     return quizOrder.findIndex(q => q.id === questionId) + 1;
   };
 
+  const filledCount = questions.filter((q) => q.questionText.trim()).length;
+
   return (
     <>
-      <Card>
-        <CardHeader>
-          <CardTitle>Questions ({questions.length}/15)</CardTitle>
+      <Card className="border-white/6">
+        <CardHeader className="border-b border-white/6 pb-4">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
+              Questions
+            </CardTitle>
+            <Badge
+              variant="outline"
+              className={cn(
+                "text-xs",
+                filledCount === questions.length && questions.length > 0
+                  ? "border-emerald-500/30 text-emerald-400"
+                  : "border-white/10 text-muted-foreground"
+              )}
+            >
+              {filledCount}/{questions.length}
+            </Badge>
+          </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead className="w-12">#</TableHead>
-                <TableHead className="w-20">Difficulty</TableHead>
-                <TableHead>Question</TableHead>
-                <TableHead className="w-20">Status</TableHead>
+              <TableRow className="border-white/6 hover:bg-transparent">
+                <TableHead className="w-12 text-xs uppercase tracking-wider text-muted-foreground/60">
+                  #
+                </TableHead>
+                <TableHead className="w-20 text-xs uppercase tracking-wider text-muted-foreground/60">
+                  Difficulty
+                </TableHead>
+                <TableHead className="text-xs uppercase tracking-wider text-muted-foreground/60">
+                  Question
+                </TableHead>
+                <TableHead className="w-20 text-xs uppercase tracking-wider text-muted-foreground/60">
+                  Status
+                </TableHead>
                 <TableHead className="w-12"></TableHead>
               </TableRow>
             </TableHeader>
@@ -312,16 +337,16 @@ export const QuestionsManager = ({
                 return (
                   <TableRow
                     key={question.id}
-                    className="cursor-pointer hover:bg-muted/50"
+                    className="cursor-pointer border-white/6 hover:bg-white/2"
                     onClick={() => openEditDialog(question)}
                   >
-                    <TableCell className="font-medium text-muted-foreground">
+                    <TableCell className="font-medium text-muted-foreground tabular-nums">
                       {index + 1}
                     </TableCell>
                     <TableCell>
                       <Badge
                         className={cn(
-                          "text-white font-medium",
+                          "text-white font-medium text-xs",
                           DIFFICULTY_COLORS[difficulty]
                         )}
                       >
@@ -330,21 +355,19 @@ export const QuestionsManager = ({
                     </TableCell>
                     <TableCell
                       className={cn(
-                        "font-medium",
-                        isEmpty && "text-muted-foreground italic"
+                        "text-sm",
+                        isEmpty
+                          ? "text-muted-foreground/50 italic"
+                          : "font-medium"
                       )}
                     >
                       {isEmpty ? "Not filled yet" : truncateText(question.questionText)}
                     </TableCell>
                     <TableCell>
                       {isEmpty ? (
-                        <Badge variant="outline" className="text-xs text-muted-foreground">
-                          Empty
-                        </Badge>
+                        <div className="h-2 w-2 rounded-full bg-white/10" />
                       ) : (
-                        <Badge variant="default" className="text-xs bg-green-500">
-                          Filled
-                        </Badge>
+                        <div className="h-2 w-2 rounded-full bg-emerald-400" />
                       )}
                     </TableCell>
                     <TableCell>
@@ -547,7 +570,12 @@ export const QuestionsManager = ({
                     {formData.answers.map((answer, index) => (
                       <div
                         key={index}
-                        className="flex items-center gap-2 rounded-md border p-3"
+                        className={cn(
+                          "flex items-center gap-2 rounded-md border p-3 transition-colors",
+                          answer.isCorrect
+                            ? "border-emerald-500/30 bg-emerald-500/5"
+                            : "border-white/10"
+                        )}
                       >
                         <RadioGroupItem
                           value={String(index)}
@@ -556,7 +584,7 @@ export const QuestionsManager = ({
                         />
                         <Label
                           htmlFor={`answer-${index}`}
-                          className="font-medium w-6 shrink-0"
+                          className="font-medium w-6 shrink-0 text-muted-foreground"
                         >
                           {ANSWER_LETTERS[index]}
                         </Label>
@@ -576,7 +604,7 @@ export const QuestionsManager = ({
                           />
                         )}
                         {answer.isCorrect && (
-                          <Badge variant="default" className="bg-green-500 shrink-0">
+                          <Badge variant="default" className="bg-emerald-500 shrink-0 text-xs">
                             Correct
                           </Badge>
                         )}

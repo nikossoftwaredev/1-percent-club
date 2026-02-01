@@ -1,6 +1,5 @@
 import { setRequestLocale } from "next-intl/server";
 import { EpisodesManager } from "@/components/admin/episodes-manager";
-import { TypographyH2 } from "@/components/ui/typography";
 import { ChevronLeft } from "lucide-react";
 import { Link } from "@/lib/i18n/navigation";
 import { Button } from "@/components/ui/button";
@@ -24,16 +23,22 @@ const EpisodesPage = async ({ params }: EpisodesPageProps) => {
   ]);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-4">
+    <div className="space-y-8">
+      <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" asChild>
           <Link href={`/admin/countries/${countryId}/seasons`}>
             <ChevronLeft className="h-4 w-4" />
           </Link>
         </Button>
-        <TypographyH2>
-          {season?.country?.name} - Season {season?.number} - Episodes
-        </TypographyH2>
+        <div className="h-6 w-px bg-white/10" />
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">
+            {season?.country?.name} — S{season?.number} Episodes
+          </h2>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Select an episode to manage its questions
+          </p>
+        </div>
       </div>
       <EpisodesManager
         countryId={countryId}

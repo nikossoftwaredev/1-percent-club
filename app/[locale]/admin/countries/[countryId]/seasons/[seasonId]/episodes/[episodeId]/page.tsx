@@ -1,6 +1,5 @@
 import { setRequestLocale } from "next-intl/server";
 import { QuestionsManager } from "@/components/admin/questions-manager";
-import { TypographyH2 } from "@/components/ui/typography";
 import { ChevronLeft, Play } from "lucide-react";
 import { Link } from "@/lib/i18n/navigation";
 import { Button } from "@/components/ui/button";
@@ -32,17 +31,23 @@ const QuestionsPage = async ({ params }: QuestionsPageProps) => {
     : undefined;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-4">
+    <div className="space-y-8">
+      <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" asChild>
           <Link href={`/admin/countries/${countryId}/seasons/${seasonId}`}>
             <ChevronLeft className="h-4 w-4" />
           </Link>
         </Button>
-        <TypographyH2>
-          {episode?.season?.country?.name} - S{episode?.season?.number} E
-          {episode?.number} - Questions
-        </TypographyH2>
+        <div className="h-6 w-px bg-white/10" />
+        <div className="flex-1">
+          <h2 className="text-2xl font-bold tracking-tight">
+            {episode?.season?.country?.name} — S{episode?.season?.number} E
+            {episode?.number} Questions
+          </h2>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Fill in questions for this episode
+          </p>
+        </div>
         {quizUrl && (
           <Button variant="default" size="default" asChild>
             <Link href={quizUrl} target="_blank">

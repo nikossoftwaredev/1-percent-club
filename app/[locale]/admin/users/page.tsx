@@ -9,13 +9,28 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BasePageProps } from "@/types/page-props";
-import { TypographyH2 } from "@/components/ui/typography";
+import { Badge } from "@/components/ui/badge";
 
 // Mock data - replace with actual data fetching
 const mockUsers = [
-  { id: "1", name: "John Doe", email: "john@example.com", createdAt: "2024-01-15" },
-  { id: "2", name: "Jane Smith", email: "jane@example.com", createdAt: "2024-01-16" },
-  { id: "3", name: "Bob Wilson", email: "bob@example.com", createdAt: "2024-01-17" },
+  {
+    id: "1",
+    name: "John Doe",
+    email: "john@example.com",
+    createdAt: "2024-01-15",
+  },
+  {
+    id: "2",
+    name: "Jane Smith",
+    email: "jane@example.com",
+    createdAt: "2024-01-16",
+  },
+  {
+    id: "3",
+    name: "Bob Wilson",
+    email: "bob@example.com",
+    createdAt: "2024-01-17",
+  },
 ];
 
 const UsersPage = async ({ params }: BasePageProps) => {
@@ -23,28 +38,54 @@ const UsersPage = async ({ params }: BasePageProps) => {
   setRequestLocale(locale);
 
   return (
-    <div className="space-y-6">
-      <TypographyH2>Users</TypographyH2>
+    <div className="space-y-8">
+      {/* Page Header */}
+      <div className="flex items-center justify-between">
+        <div className="space-y-1">
+          <h2 className="text-2xl font-bold tracking-tight">Users</h2>
+          <p className="text-sm text-muted-foreground">
+            Manage registered users
+          </p>
+        </div>
+        <Badge variant="outline" className="border-white/10 text-muted-foreground">
+          {mockUsers.length} total
+        </Badge>
+      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>All Users</CardTitle>
+      <Card className="border-white/6">
+        <CardHeader className="border-b border-white/6 pb-4">
+          <CardTitle className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
+            All Users
+          </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Joined</TableHead>
+              <TableRow className="border-white/6 hover:bg-transparent">
+                <TableHead className="text-xs uppercase tracking-wider text-muted-foreground/60">
+                  Name
+                </TableHead>
+                <TableHead className="text-xs uppercase tracking-wider text-muted-foreground/60">
+                  Email
+                </TableHead>
+                <TableHead className="text-xs uppercase tracking-wider text-muted-foreground/60">
+                  Joined
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {mockUsers.map((user) => (
-                <TableRow key={user.id}>
+                <TableRow
+                  key={user.id}
+                  className="border-white/6 hover:bg-white/2"
+                >
                   <TableCell className="font-medium">{user.name}</TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell>{user.createdAt}</TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {user.email}
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {user.createdAt}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

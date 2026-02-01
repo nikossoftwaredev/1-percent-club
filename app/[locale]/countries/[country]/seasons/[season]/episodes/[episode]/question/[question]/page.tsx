@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import { cache } from "react";
-import { setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
-import { getEpisodeForQuiz } from "@/server-actions/episodes";
+import { setRequestLocale } from "next-intl/server";
+import { cache } from "react";
+
 import { EpisodeQuiz } from "@/components/quiz/episode-quiz";
 import { getDifficultyLabel } from "@/lib/quiz/difficulty";
+import { getEpisodeForQuiz } from "@/server-actions/episodes";
 
 // Cache the data fetch to share between generateMetadata and page
 const getEpisodeData = cache(
@@ -39,22 +40,35 @@ export const generateMetadata = async ({
     ? getDifficultyLabel(questionData.difficulty)
     : "50%";
 
-  const title = `Question ${question} - 1% Club`;
-  const description = questionData?.questionText?.slice(0, 150) ||
-    "Can you answer this question?";
+  const questionText = questionData?.questionText ?? "";
+  const countryName = episodeData?.season.country.name ?? country;
+
+  // Include the question text in the title so Google can match searches
+  const title = questionText
+    ? `${questionText.slice(0, 70)} - 1% Club`
+    : `Question ${question} - 1% Club`;
+
+  // Full question text in description for search matching
+  const description = questionText
+    ? `${questionText} | 1% Club ${countryName} S${season} E${episode} - Only ${difficulty} of people can answer this. Can you?`
+    : "Can you answer this question? Test your knowledge with the 1% Club quiz!";
 
   return {
     title,
     description,
     openGraph: {
-      title: `1% Club - Question ${question}`,
-      description: `Only ${difficulty} got this right! Can you?`,
+      title: questionText
+        ? `${questionText.slice(0, 100)} | 1% Club`
+        : `1% Club - Question ${question}`,
+      description: `Only ${difficulty} of people got this right! ${countryName} Season ${season}, Episode ${episode}. Can you answer it?`,
       type: "website",
     },
     twitter: {
       card: "summary_large_image",
-      title: `1% Club - Question ${question}`,
-      description: `Only ${difficulty} got this right! Can you?`,
+      title: questionText
+        ? `${questionText.slice(0, 100)} | 1% Club`
+        : `1% Club - Question ${question}`,
+      description: `Only ${difficulty} of people got this right! Can you?`,
     },
   };
 };
