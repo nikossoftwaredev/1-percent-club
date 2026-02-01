@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useLocale } from "next-intl";
 import { Share2, RotateCcw, ArrowRight, LogOut, CheckCircle, Trophy } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -52,6 +53,7 @@ interface EpisodeQuizProps {
 
 export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizProps) => {
   const router = useRouter();
+  const locale = useLocale();
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(initialQuestionIndex);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
@@ -81,9 +83,9 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
 
   useEffect(() => {
     const questionOrderInShow = currentQuestion?.orderInShow ?? currentQuestionIndex + 1;
-    const basePath = `/countries/${episode.season.country.slug}/seasons/${episode.season.number}/episodes/${episode.number}/question`;
-    router.replace(`${basePath}/${questionOrderInShow}`);
-  }, [currentQuestionIndex, currentQuestion?.orderInShow, episode.season.country.slug, episode.season.number, episode.number, router]);
+    const basePath = `/${locale}/countries/${episode.season.country.slug}/seasons/${episode.season.number}/episodes/${episode.number}/question`;
+    window.history.replaceState(null, "", `${basePath}/${questionOrderInShow}`);
+  }, [currentQuestionIndex, currentQuestion?.orderInShow, episode.season.country.slug, episode.season.number, episode.number, locale]);
 
   useEffect(() => {
     if (showExplanation || isQuizComplete || totalQuestions === 0) return;
