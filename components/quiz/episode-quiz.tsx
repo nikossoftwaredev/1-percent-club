@@ -250,7 +250,7 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
               </div>
             </div>
 
-            <div className="flex gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Button
                 variant="outline"
                 onClick={handleBackToEpisodes}
@@ -260,9 +260,17 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
               </Button>
               <Button
                 onClick={() => window.location.reload()}
-                className={GOLDEN_BUTTON_STYLES}
+                className={OUTLINE_BUTTON_STYLES}
               >
                 Play Again
+              </Button>
+              <Button
+                onClick={() => router.push(
+                  `/countries/${episode.season.country.slug}/seasons/${episode.season.number}/episodes/${episode.number + 1}`
+                )}
+                className={GOLDEN_BUTTON_STYLES}
+              >
+                Next Episode
               </Button>
             </div>
           </div>
@@ -448,16 +456,15 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
                             onClick={() => handleAnswerSelect(index)}
                             disabled={showExplanation}
                             className={cn(
-                              "golden-border-thin transition-all transform hover:scale-105 cursor-pointer",
+                              "golden-border-thin transition-all transform hover:scale-105 cursor-pointer min-h-20",
                               isSelected && !showExplanation && "scale-105",
                               "disabled:hover:scale-100 disabled:cursor-not-allowed",
-                              answer.answerImage ? "aspect-square" : "min-h-20"
                             )}
                           >
                             <div
                               className={cn(
-                                "rounded-lg flex relative overflow-hidden h-full",
-                                answer.answerImage ? "p-0" : "p-4 items-center gap-3",
+                                "rounded-lg flex relative overflow-hidden h-full items-center justify-center",
+                                answer.answerImage ? "p-0" : "p-4 pl-14",
                                 getAnswerButtonClasses(
                                   isSelected,
                                   answer.isCorrect,
@@ -467,56 +474,41 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
                                 )
                               )}
                             >
+                              {/* Letter Badge - Always top left */}
+                              <div className="absolute top-2 left-2 z-10">
+                                <div
+                                  className={cn(
+                                    "w-8 h-8 rounded-md flex items-center justify-center font-bold text-lg shadow-lg",
+                                    !showExplanation && "bg-black/80 text-white",
+                                    showExplanation && answer.isCorrect && "bg-green-500 text-black",
+                                    showExplanation && isSelectedIncorrect && "bg-red-500 text-white",
+                                    showExplanation && !answer.isCorrect && !isSelectedIncorrect && "bg-black/80 text-white"
+                                  )}
+                                >
+                                  {ANSWER_LETTERS[index]}
+                                </div>
+                              </div>
+
+                              {/* Content - Image or Text */}
                               {answer.answerImage ? (
                                 <>
-                                  {/* Image fills the entire square */}
                                   <img
                                     src={answer.answerImage}
                                     alt={`Answer ${ANSWER_LETTERS[index]}`}
-                                    className="w-full h-full object-cover"
+                                    className="w-full h-full object-contain"
                                   />
-                                  {/* Black gradient overlay */}
                                   <div className="absolute inset-0 bg-linear-to-b from-black/50 via-transparent to-black/30" />
-                                  {/* Letter Badge - Top left inside */}
-                                  <div className="absolute top-2 left-2">
-                                    <div
-                                      className={cn(
-                                        "w-8 h-8 rounded-md flex items-center justify-center font-bold text-lg shadow-lg",
-                                        !showExplanation && "bg-black/80 text-white",
-                                        showExplanation && answer.isCorrect && "bg-green-500 text-black",
-                                        showExplanation && isSelectedIncorrect && "bg-red-500 text-white",
-                                        showExplanation && !answer.isCorrect && !isSelectedIncorrect && "bg-black/80 text-white"
-                                      )}
-                                    >
-                                      {ANSWER_LETTERS[index]}
-                                    </div>
-                                  </div>
                                 </>
                               ) : (
-                                <>
-                                  {/* Text layout with badge inline */}
-                                  <div
-                                    className={getLetterBadgeClasses(
-                                      answer.isCorrect,
-                                      isSelectedIncorrect,
-                                      showExplanation
-                                    )}
-                                  >
-                                    {ANSWER_LETTERS[index]}
-                                  </div>
-                                  <span className="text-white text-base font-medium flex-1 text-left wrap-break-word">
-                                    {answer.answerText}
-                                  </span>
-                                </>
+                                <span className="text-white text-base font-medium flex-1 text-left wrap-break-word">
+                                  {answer.answerText}
+                                </span>
                               )}
 
-                              {/* Incorrect Indicator Only */}
+                              {/* Incorrect Indicator */}
                               {showExplanation && isSelectedIncorrect && (
                                 <svg
-                                  className={cn(
-                                    "text-red-500 absolute drop-shadow-lg",
-                                    answer.answerImage ? "w-8 h-8 top-2 right-2" : "w-8 h-8 right-4"
-                                  )}
+                                  className="text-red-500 absolute w-8 h-8 top-2 right-2 drop-shadow-lg z-10"
                                   fill="none"
                                   stroke="currentColor"
                                   viewBox="0 0 24 24"
@@ -549,14 +541,26 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="mt-6 flex justify-between">
-                    <Button
-                      variant="outline"
-                      onClick={handleBackToEpisodes}
-                      className={OUTLINE_BUTTON_STYLES}
-                    >
-                      Exit Quiz
-                    </Button>
+                  <div className="mt-6 flex items-center justify-between">
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        onClick={handleBackToEpisodes}
+                        className={OUTLINE_BUTTON_STYLES}
+                      >
+                        Exit Quiz
+                      </Button>
+                      {showExplanation && (
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={handleShare}
+                          className={OUTLINE_BUTTON_STYLES}
+                        >
+                          <Share2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
                     {!showExplanation ? (
                       <Button
                         onClick={handleSubmitAnswer}
@@ -571,24 +575,14 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
                         Submit Answer
                       </Button>
                     ) : (
-                      <div className="flex gap-3">
-                        <Button
-                          variant="outline"
-                          onClick={handleShare}
-                          className={OUTLINE_BUTTON_STYLES}
-                        >
-                          <Share2 className="h-4 w-4 mr-2" />
-                          Share
-                        </Button>
-                        <Button
-                          onClick={handleNextQuestion}
-                          className={GOLDEN_BUTTON_STYLES}
-                        >
-                          {currentQuestionIndex < totalQuestions - 1
-                            ? "Next Question"
-                            : "Finish Quiz"}
-                        </Button>
-                      </div>
+                      <Button
+                        onClick={handleNextQuestion}
+                        className={GOLDEN_BUTTON_STYLES}
+                      >
+                        {currentQuestionIndex < totalQuestions - 1
+                          ? "Next Question"
+                          : "Finish Quiz"}
+                      </Button>
                     )}
                   </div>
                 </div>

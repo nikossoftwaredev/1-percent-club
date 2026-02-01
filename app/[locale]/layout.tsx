@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import { hasLocale } from "next-intl";
 import { notFound } from "next/navigation";
 import { setRequestLocale, getMessages } from "next-intl/server";
-import { Roboto } from "next/font/google";
+import { Roboto_Mono } from "next/font/google";
 import { routing } from "@/lib/i18n/routing";
 import { Providers } from "@/components/providers";
 import { BaseLayoutProps } from "@/types/page-props";
 import "./globals.css";
 
-const roboto = Roboto({
-  variable: "--font-roboto",
+const robotoMono = Roboto_Mono({
+  variable: "--font-roboto-mono",
   subsets: ["latin"],
   weight: ["400", "500", "700"],
 });
@@ -37,7 +37,7 @@ const LocaleLayout = async ({ children, params }: BaseLayoutProps) => {
 
   return (
     <html lang={locale} suppressHydrationWarning>
-      <body className={`${roboto.variable} font-sans antialiased`}>
+      <body className={`${robotoMono.variable} font-sans antialiased`}>
         <Providers messages={messages} locale={locale}>
           {children}
         </Providers>

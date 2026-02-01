@@ -1,8 +1,7 @@
 import { setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Link } from "@/lib/i18n/navigation";
 import { ThemeSwitcher } from "@/components/examples/ThemeSwitcher";
 import { LoginButton } from "@/components/examples/login-button";
@@ -69,9 +68,10 @@ const SeasonsPage = async ({ params }: SeasonsPageProps) => {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {countryData.seasons.map((season) => (
-                <Card
+                <Link
                   key={season.id}
-                  className="group relative overflow-hidden transition-all duration-300 hover:shadow-xl hover:scale-[1.02] cursor-pointer"
+                  href={`/countries/${country}/seasons/${season.number}/episodes`}
+                  className="group relative overflow-hidden rounded-xl border bg-card transition-all duration-300 hover:shadow-xl hover:scale-[1.03]"
                 >
                   {/* Season header with gradient */}
                   <div className="relative h-32 bg-linear-to-br from-primary/80 to-primary flex items-center justify-center">
@@ -103,7 +103,7 @@ const SeasonsPage = async ({ params }: SeasonsPageProps) => {
                   </div>
 
                   {/* Card content */}
-                  <CardContent className="p-4 space-y-4">
+                  <div className="p-4 space-y-3">
                     <div className="flex items-center justify-between text-sm text-muted-foreground">
                       {season.year && (
                         <div className="flex items-center gap-1">
@@ -117,14 +117,12 @@ const SeasonsPage = async ({ params }: SeasonsPageProps) => {
                       </div>
                     </div>
 
-                    <Button className="w-full" size="lg" asChild>
-                      <Link href={`/countries/${country}/seasons/${season.number}/episodes`}>
-                        <Play className="h-4 w-4 mr-2" />
-                        Play Season
-                      </Link>
-                    </Button>
-                  </CardContent>
-                </Card>
+                    <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground group-hover:text-foreground transition-colors">
+                      <Play className="h-3.5 w-3.5" />
+                      <span>Play Season</span>
+                    </div>
+                  </div>
+                </Link>
               ))}
             </div>
           )}

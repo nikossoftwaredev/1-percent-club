@@ -1,11 +1,10 @@
 import { setRequestLocale } from "next-intl/server";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/lib/i18n/navigation";
 import { ThemeSwitcher } from "@/components/examples/ThemeSwitcher";
 import { LoginButton } from "@/components/examples/login-button";
 import { LanguageSwitcher } from "@/components/examples/language-switcher";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Play } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { getEpisodesByCountryAndSeason } from "@/server-actions/episodes";
 import { notFound } from "next/navigation";
@@ -36,7 +35,7 @@ const EpisodesPage = async ({ params }: EpisodesPageProps) => {
                 <img
                   src={data.country.flagImage}
                   alt={data.country.name}
-                  className="h-6 w-6 rounded object-cover"
+                  className="h-6 w-8 object-cover rounded"
                 />
               )}
               <div className="font-bold text-xl">
@@ -61,30 +60,48 @@ const EpisodesPage = async ({ params }: EpisodesPageProps) => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {data.episodes.map((episode) => (
-              <Card
-                key={episode.id}
-                className="relative overflow-hidden transition-all hover:shadow-lg hover:scale-105 cursor-pointer"
-              >
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    <span>Episode {episode.number}</span>
-                    <Badge variant="secondary">
-                      {episode.filledQuestionsCount}/{episode.totalQuestions}
-                    </Badge>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Button className="w-full" asChild>
-                    <Link href={`/countries/${country}/seasons/${season}/episodes/${episode.number}`}>
-                      Start Episode
-                    </Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          {data.episodes.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No episodes available yet.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+              {data.episodes.map((episode) => (
+                <Link
+                  key={episode.id}
+                  href={`/countries/${country}/seasons/${season}/episodes/${episode.number}`}
+                  className="group relative overflow-hidden rounded-xl border bg-card transition-all duration-300 hover:shadow-xl hover:scale-[1.03]"
+                >
+                  {/* Episode number header */}
+                  <div className="relative h-24 bg-linear-to-br from-primary/80 to-primary flex items-center justify-center">
+                    <span className="text-5xl font-bold text-white/20">
+                      {String(episode.number).padStart(2, "0")}
+                    </span>
+
+                    {/* Question count badge */}
+                    <div className="absolute top-2 right-2">
+                      <Badge className="bg-black/50 text-white border-none backdrop-blur-sm text-xs">
+                        {episode.filledQuestionsCount}/{episode.totalQuestions}
+                      </Badge>
+                    </div>
+
+                    {/* Title overlay */}
+                    <div className="absolute bottom-0 left-0 right-0 p-3 bg-linear-to-t from-black/60 to-transparent">
+                      <h2 className="text-sm font-bold text-white">
+                        Episode {episode.number}
+                      </h2>
+                    </div>
+                  </div>
+
+                  {/* Play action */}
+                  <div className="p-3 flex items-center justify-center gap-2 text-sm text-muted-foreground group-hover:text-foreground transition-colors">
+                    <Play className="h-3.5 w-3.5" />
+                    <span>Play</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </main>
     </div>

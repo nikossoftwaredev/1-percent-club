@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 import { getEpisodeForQuiz } from "@/server-actions/episodes";
+import { getDifficultyLabel } from "@/lib/quiz/difficulty";
 
 export const size = {
   width: 1200,
@@ -21,15 +22,20 @@ const OGImage = async ({ params }: OGImageProps) => {
   const { country, season, episode, question } = await params;
   const seasonNumber = parseInt(season, 10);
   const episodeNumber = parseInt(episode, 10);
-  const questionIndex = parseInt(question, 10) - 1;
+  const questionNumber = parseInt(question, 10);
 
   const episodeData = await getEpisodeForQuiz(
     country,
     seasonNumber,
     episodeNumber
   );
-  const questionData = episodeData?.questions[questionIndex];
+  const questionData = episodeData?.questions.find(
+    (q) => q.orderInShow === questionNumber
+  );
 
+  const difficultyLabel = questionData
+    ? getDifficultyLabel(questionData.difficulty)
+    : "50%";
   const questionText = questionData?.questionText || "Can you answer this?";
   const extraText = questionData?.questionExtraText || null;
   const questionImage = questionData?.questionImage || null;
@@ -59,7 +65,7 @@ const OGImage = async ({ params }: OGImageProps) => {
             letterSpacing: "0.02em",
           }}
         >
-          {`QUESTION ${question.padStart(2, "0")}`}
+          {`THE ${difficultyLabel} QUESTION`}
         </div>
 
         {/* Content Area */}
