@@ -1,4 +1,8 @@
-import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import {
+  DeleteObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from "@aws-sdk/client-s3";
 
 // S3-compatible storage configuration
 const s3Client = new S3Client({
@@ -16,7 +20,7 @@ export const IMAGES_BUCKET = "images";
 export const uploadFile = async (
   file: Buffer,
   fileName: string,
-  contentType: string
+  contentType: string,
 ): Promise<string> => {
   const command = new PutObjectCommand({
     Bucket: IMAGES_BUCKET,
@@ -29,8 +33,8 @@ export const uploadFile = async (
 
   // Construct public URL
   // Format: https://<project-ref>.supabase.co/storage/v1/object/public/<bucket>/<path>
-  const projectRef = process.env.SUPABASE_S3_ENDPOINT!
-    .replace("https://", "")
+  const projectRef = process.env
+    .SUPABASE_S3_ENDPOINT!.replace("https://", "")
     .replace(".storage.supabase.co/storage/v1/s3", "");
 
   const publicUrl = `https://${projectRef}.supabase.co/storage/v1/object/public/${IMAGES_BUCKET}/${fileName}`;
