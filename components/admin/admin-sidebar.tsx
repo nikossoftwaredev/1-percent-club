@@ -44,8 +44,8 @@ export const AdminSidebar = () => {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="border-b border-white/6">
-        <div className="flex items-center gap-3 px-2 py-3">
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-yellow-400/20 to-orange-500/20 border border-yellow-500/30 shadow-[0_0_12px_rgba(255,215,0,0.15)]">
+        <div className="flex items-center gap-3 px-2 py-3 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-yellow-400/20 to-orange-500/20 border border-yellow-500/30">
             <Crown className="h-4 w-4 text-yellow-400" />
           </div>
           <div className="flex flex-col group-data-[collapsible=icon]:hidden">

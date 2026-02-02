@@ -10,32 +10,23 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BasePageProps } from "@/types/page-props";
 import { Badge } from "@/components/ui/badge";
-
-// Mock data - replace with actual data fetching
-const mockUsers = [
-  {
-    id: "1",
-    name: "John Doe",
-    email: "john@example.com",
-    createdAt: "2024-01-15",
-  },
-  {
-    id: "2",
-    name: "Jane Smith",
-    email: "jane@example.com",
-    createdAt: "2024-01-16",
-  },
-  {
-    id: "3",
-    name: "Bob Wilson",
-    email: "bob@example.com",
-    createdAt: "2024-01-17",
-  },
-];
+import { prisma } from "@/lib/db";
 
 const UsersPage = async ({ params }: BasePageProps) => {
   const { locale } = await params;
   setRequestLocale(locale);
+
+  const users = await prisma.user.findMany({
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      image: true,
+      role: true,
+      createdAt: true,
+    },
+    orderBy: { createdAt: "desc" },
+  });
 
   return (
     <div className="space-y-8">
@@ -48,7 +39,7 @@ const UsersPage = async ({ params }: BasePageProps) => {
           </p>
         </div>
         <Badge variant="outline" className="border-white/10 text-muted-foreground">
-          {mockUsers.length} total
+          {users.length} total
         </Badge>
       </div>
 
@@ -69,22 +60,41 @@ const UsersPage = async ({ params }: BasePageProps) => {
                   Email
                 </TableHead>
                 <TableHead className="text-xs uppercase tracking-wider text-muted-foreground/60">
+                  Role
+                </TableHead>
+                <TableHead className="text-xs uppercase tracking-wider text-muted-foreground/60">
                   Joined
                 </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {mockUsers.map((user) => (
+              {users.map((user) => (
                 <TableRow
                   key={user.id}
                   className="border-white/6 hover:bg-white/2"
                 >
-                  <TableCell className="font-medium">{user.name}</TableCell>
+                  <TableCell className="font-medium">
+                    {user.name ?? "—"}
+                  </TableCell>
                   <TableCell className="text-muted-foreground">
                     {user.email}
                   </TableCell>
+                  <TableCell>
+                    <Badge
+                      variant="outline"
+                      className={
+                        user.role === "ADMIN"
+                          ? "border-yellow-500/30 text-yellow-400"
+                          : user.role === "MODERATOR"
+                            ? "border-blue-500/30 text-blue-400"
+                            : "border-white/10 text-muted-foreground"
+                      }
+                    >
+                      {user.role}
+                    </Badge>
+                  </TableCell>
                   <TableCell className="text-muted-foreground">
-                    {user.createdAt}
+                    {user.createdAt.toLocaleDateString()}
                   </TableCell>
                 </TableRow>
               ))}

@@ -2,6 +2,7 @@ import { setRequestLocale } from "next-intl/server";
 
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   SidebarInset,
   SidebarProvider,
@@ -22,7 +23,7 @@ const AdminLayout = async ({ children, params }: BaseLayoutProps) => {
   return (
     <SidebarProvider>
       <AdminSidebar />
-      <SidebarInset>
+      <SidebarInset className="h-screen flex flex-col overflow-hidden">
         <header className="flex h-14 shrink-0 items-center gap-2 border-b border-white/6 bg-background/60 backdrop-blur-sm px-4">
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-4 bg-white/10" />
@@ -33,7 +34,9 @@ const AdminLayout = async ({ children, params }: BaseLayoutProps) => {
             </span>
           </div>
         </header>
-        <main className="flex-1 p-6">{children}</main>
+        <ScrollArea className="flex-1">
+          <main className="p-6">{children}</main>
+        </ScrollArea>
       </SidebarInset>
     </SidebarProvider>
   );
