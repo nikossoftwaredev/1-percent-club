@@ -5,7 +5,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/auth";
 
 // Static list of admin emails
-const ADMIN_EMAILS = ["dollswithballs420@gmail.com"];
+const ADMIN_EMAILS = ["dollswithballs420@gmail.com", "warian2000@gmail.com"];
 
 /**
  * Check if the current user is an admin
@@ -24,7 +24,9 @@ export const isAdmin = async (): Promise<boolean> => {
  * @param email - Email to check
  * @returns true if the email is in the admin list
  */
-export const isAdminEmail = async (email: string | null | undefined): Promise<boolean> => {
+export const isAdminEmail = async (
+  email: string | null | undefined,
+): Promise<boolean> => {
   if (!email) return false;
   return ADMIN_EMAILS.includes(email);
 };
