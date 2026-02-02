@@ -328,7 +328,7 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
                   <div className="flex-1">
                     <div className="golden-border h-full">
                       <div className="p-6 bg-card backdrop-blur-sm rounded-xl h-full flex items-center justify-center">
-                        <div className="quiz-question wrap-break-word">
+                        <div className="text-2xl md:text-3xl lg:text-4xl font-medium text-foreground whitespace-pre-line leading-[1.4] tracking-[0.025em] text-left wrap-break-word">
                           {currentQuestion.questionText}
                         </div>
                       </div>
@@ -354,8 +354,8 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
                       </div>
                       {currentQuestion.questionExtraText && (
                         <div className="golden-border">
-                          <div className="p-4 bg-card backdrop-blur-sm rounded-xl">
-                            <div className="quiz-question wrap-break-word">
+                          <div className="p-4 bg-card backdrop-blur-sm rounded-xl flex items-center justify-center">
+                            <div className="text-2xl md:text-3xl lg:text-4xl font-medium text-foreground whitespace-pre-line leading-[1.4] tracking-[0.025em] text-left wrap-break-word">
                               {currentQuestion.questionExtraText}
                             </div>
                           </div>
@@ -369,8 +369,8 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
               <>
                 <div className="w-full max-w-4xl">
                   <div className="golden-border">
-                    <div className="p-6 bg-card backdrop-blur-sm rounded-xl">
-                      <div className="quiz-question wrap-break-word">
+                    <div className="p-6 bg-card backdrop-blur-sm rounded-xl flex items-center justify-center">
+                      <div className="text-2xl md:text-3xl lg:text-4xl font-medium text-foreground whitespace-pre-line leading-[1.4] tracking-[0.025em] text-left wrap-break-word">
                         {currentQuestion.questionText}
                       </div>
                     </div>
@@ -400,8 +400,8 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
                 {currentQuestion.questionExtraText && (
                   <div className="w-full max-w-4xl">
                     <div className="golden-border">
-                      <div className="p-4 bg-card backdrop-blur-sm rounded-xl">
-                        <div className="quiz-question wrap-break-word">
+                      <div className="p-4 bg-card backdrop-blur-sm rounded-xl flex items-center justify-center">
+                        <div className="text-2xl md:text-3xl lg:text-4xl font-medium text-foreground whitespace-pre-line leading-[1.4] tracking-[0.025em] text-left wrap-break-word">
                           {currentQuestion.questionExtraText}
                         </div>
                       </div>
@@ -461,7 +461,12 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
                       )}
                     </div>
                   ) : (
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 w-full">
+                    <div className={cn(
+                      "grid gap-3 w-full",
+                      currentQuestion.answers.length === 2 && "grid-cols-2",
+                      currentQuestion.answers.length === 3 && "grid-cols-2 md:grid-cols-3",
+                      currentQuestion.answers.length >= 4 && "grid-cols-2 md:grid-cols-3",
+                    )}>
                       {currentQuestion.answers.map((answer, index) => {
                         const isSelected = selectedAnswer === index;
                         const isSelectedIncorrect = isSelected && !answer.isCorrect;
@@ -495,7 +500,7 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
                                 <div
                                   className={cn(
                                     "w-8 h-8 rounded-md flex items-center justify-center font-bold text-sm shadow-lg transition-colors",
-                                    !showExplanation && "bg-black/80 text-white",
+                                    !showExplanation && "bg-black/80 text-white border border-yellow-500/40",
                                     showExplanation && answer.isCorrect && "bg-green-500 text-black",
                                     showExplanation && isSelectedIncorrect && "bg-red-500 text-white",
                                     showExplanation && !answer.isCorrect && !isSelectedIncorrect && "bg-black/80 text-white/50"

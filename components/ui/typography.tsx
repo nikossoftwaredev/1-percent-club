@@ -85,7 +85,7 @@ export const TypographyMono = ({ className, children, ...props }: TypographyProp
 export const TypographyQuizQuestion = ({ className, children, ...props }: TypographyProps) => (
   <p
     className={cn(
-      "quiz-question",
+      "text-2xl md:text-3xl lg:text-4xl font-medium text-foreground whitespace-pre-line leading-[1.4] tracking-[0.025em]",
       className
     )}
     {...props}

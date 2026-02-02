@@ -34,7 +34,7 @@ const AdminLayout = async ({ children, params }: BaseLayoutProps) => {
             </span>
           </div>
         </header>
-        <ScrollArea className="flex-1">
+        <ScrollArea className="flex-1 min-h-0">
           <main className="p-6">{children}</main>
         </ScrollArea>
       </SidebarInset>
