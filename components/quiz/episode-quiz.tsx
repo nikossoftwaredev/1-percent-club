@@ -11,6 +11,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/general/utils";
 import { useRouter } from "@/lib/i18n/navigation";
 import { getDifficultyLabel, ANSWER_LETTERS } from "@/lib/quiz/difficulty";
+import { aiCheckAnswer } from "@/server-actions/ai-check-answer";
 import { EpisodeForQuiz } from "@/server-actions/episodes";
 
 const DEFAULT_TIME = 30;
@@ -65,6 +66,7 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
   const [isTextAnswerCorrect, setIsTextAnswerCorrect] = useState<
     boolean | null
   >(null);
+  const [isCheckingAnswer, setIsCheckingAnswer] = useState(false);
 
   const questions = episode.questions;
   const currentQuestion = questions[currentQuestionIndex];
@@ -105,13 +107,15 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
     setSelectedAnswer(answerIndex);
   };
 
-  const handleSubmitAnswer = () => {
+  const handleSubmitAnswer = async () => {
     if (isTextInputQuestion) {
-      const correctAnswer = currentQuestion.answers[0].answerText
-        .toLowerCase()
-        .trim();
-      const userAnswer = textAnswer.toLowerCase().trim();
-      const isCorrect = correctAnswer === userAnswer;
+      setIsCheckingAnswer(true);
+      const isCorrect = await aiCheckAnswer({
+        userAnswer: textAnswer,
+        correctAnswer: currentQuestion.answers[0].answerText,
+        explanation: currentQuestion.explanation,
+      });
+      setIsCheckingAnswer(false);
 
       setIsTextAnswerCorrect(isCorrect);
       if (isCorrect) setScore((prev) => prev + 1);
@@ -428,7 +432,7 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
                           !showExplanation && "border-gray-600 focus:border-yellow-500"
                         )}
                         onKeyDown={(e) => {
-                          if (e.key === "Enter" && canSubmit && !showExplanation)
+                          if (e.key === "Enter" && canSubmit && !showExplanation && !isCheckingAnswer)
                             handleSubmitAnswer();
                         }}
                       />
@@ -586,15 +590,15 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
                     {!showExplanation ? (
                       <Button
                         onClick={handleSubmitAnswer}
-                        disabled={!canSubmit}
+                        disabled={!canSubmit || isCheckingAnswer}
                         className={cn(
                           "font-bold transition-all",
-                          canSubmit
+                          canSubmit && !isCheckingAnswer
                             ? GOLDEN_BUTTON_STYLES
                             : "bg-gray-700 text-gray-400 cursor-not-allowed"
                         )}
                       >
-                        Submit Answer
+                        {isCheckingAnswer ? "Checking..." : "Submit Answer"}
                       </Button>
                     ) : (
                       <Button
