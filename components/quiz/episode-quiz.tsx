@@ -477,15 +477,31 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
                             onClick={() => handleAnswerSelect(index)}
                             disabled={showExplanation}
                             className={cn(
-                              "answer-card golden-border-thin cursor-pointer min-h-20",
+                              "answer-card golden-border-thin cursor-pointer relative overflow-visible",
+                              answer.answerImage ? "aspect-square" : "min-h-20",
                               isSelected && !showExplanation && "scale-[1.03]",
                               "disabled:cursor-not-allowed",
                             )}
                           >
+                            {/* Letter Badge - half outside the card */}
+                            <div className="absolute -top-3 -left-3 z-10">
+                              <div
+                                className={cn(
+                                  "w-8 h-8 rounded-md flex items-center justify-center font-bold text-sm shadow-lg transition-colors",
+                                  !showExplanation && "bg-black/80 text-white border border-yellow-500/40",
+                                  showExplanation && answer.isCorrect && "bg-green-500 text-black",
+                                  showExplanation && isSelectedIncorrect && "bg-red-500 text-white",
+                                  showExplanation && !answer.isCorrect && !isSelectedIncorrect && "bg-black/80 text-white/50"
+                                )}
+                              >
+                                {ANSWER_LETTERS[index]}
+                              </div>
+                            </div>
+
                             <div
                               className={cn(
                                 "rounded-lg flex relative overflow-hidden h-full items-center justify-center transition-colors",
-                                answer.answerImage ? "p-0" : "p-4 pl-14",
+                                answer.answerImage ? "p-4" : "p-4 pl-10",
                                 getAnswerButtonClasses(
                                   isSelected,
                                   answer.isCorrect,
@@ -495,30 +511,12 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
                                 )
                               )}
                             >
-                              {/* Letter Badge */}
-                              <div className="absolute top-2 left-2 z-10">
-                                <div
-                                  className={cn(
-                                    "w-8 h-8 rounded-md flex items-center justify-center font-bold text-sm shadow-lg transition-colors",
-                                    !showExplanation && "bg-black/80 text-white border border-yellow-500/40",
-                                    showExplanation && answer.isCorrect && "bg-green-500 text-black",
-                                    showExplanation && isSelectedIncorrect && "bg-red-500 text-white",
-                                    showExplanation && !answer.isCorrect && !isSelectedIncorrect && "bg-black/80 text-white/50"
-                                  )}
-                                >
-                                  {ANSWER_LETTERS[index]}
-                                </div>
-                              </div>
-
                               {answer.answerImage ? (
-                                <>
-                                  <img
-                                    src={answer.answerImage}
-                                    alt={`Answer ${ANSWER_LETTERS[index]}`}
-                                    className="w-full h-full object-contain"
-                                  />
-                                  <div className="absolute inset-0 bg-linear-to-b from-black/50 via-transparent to-black/30" />
-                                </>
+                                <img
+                                  src={answer.answerImage}
+                                  alt={`Answer ${ANSWER_LETTERS[index]}`}
+                                  className="max-w-full max-h-full object-contain"
+                                />
                               ) : (
                                 <span className="text-white text-base font-medium flex-1 text-left wrap-break-word">
                                   {answer.answerText}

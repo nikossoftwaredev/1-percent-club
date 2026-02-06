@@ -27,28 +27,28 @@ const SeasonsPage = async ({ params }: SeasonsPageProps) => {
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b border-white/5 bg-background/80 backdrop-blur-xl">
         <div className="container flex h-14 items-center justify-between px-6">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" asChild>
+          <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
+            <Button variant="ghost" size="icon" className="shrink-0" asChild>
               <Link href="/countries">
                 <ArrowLeft className="h-4 w-4" />
               </Link>
             </Button>
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2 min-w-0">
               {countryData.flagImage && (
                 <img
                   src={countryData.flagImage}
                   alt={countryData.name}
-                  className="h-5 w-7 object-cover rounded-sm"
+                  className="h-5 w-7 object-cover rounded-sm shrink-0"
                 />
               )}
-              <span className="font-bold text-lg">
+              <span className="font-bold text-sm sm:text-lg truncate">
                 <span className="text-yellow-400">1% Club</span>
-                <span className="text-muted-foreground mx-2">·</span>
+                <span className="text-muted-foreground mx-1 sm:mx-2">·</span>
                 <span className="text-foreground">{countryData.name}</span>
               </span>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
             <LanguageSwitcher />
             <ThemeSwitcher />
             <LoginButton />
