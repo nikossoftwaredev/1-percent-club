@@ -328,7 +328,7 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
                   <div className="flex-1">
                     <div className="golden-border h-full">
                       <div className="p-6 bg-card backdrop-blur-sm rounded-xl h-full flex items-center justify-center">
-                        <div className="text-2xl md:text-3xl lg:text-4xl font-medium text-foreground whitespace-pre-line leading-[1.4] tracking-[0.025em] text-left wrap-break-word">
+                        <div className="w-full text-2xl md:text-3xl lg:text-4xl font-medium text-foreground whitespace-pre-line leading-[1.4] tracking-[0.025em] text-left wrap-break-word">
                           {currentQuestion.questionText}
                         </div>
                       </div>
@@ -355,7 +355,7 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
                       {currentQuestion.questionExtraText && (
                         <div className="golden-border">
                           <div className="p-4 bg-card backdrop-blur-sm rounded-xl flex items-center justify-center">
-                            <div className="text-2xl md:text-3xl lg:text-4xl font-medium text-foreground whitespace-pre-line leading-[1.4] tracking-[0.025em] text-left wrap-break-word">
+                            <div className="w-full text-2xl md:text-3xl lg:text-4xl font-medium text-foreground whitespace-pre-line leading-[1.4] tracking-[0.025em] text-left wrap-break-word">
                               {currentQuestion.questionExtraText}
                             </div>
                           </div>
@@ -370,7 +370,7 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
                 <div className="w-full max-w-4xl">
                   <div className="golden-border">
                     <div className="p-6 bg-card backdrop-blur-sm rounded-xl flex items-center justify-center">
-                      <div className="text-2xl md:text-3xl lg:text-4xl font-medium text-foreground whitespace-pre-line leading-[1.4] tracking-[0.025em] text-left wrap-break-word">
+                      <div className="w-full text-2xl md:text-3xl lg:text-4xl font-medium text-foreground whitespace-pre-line leading-[1.4] tracking-[0.025em] text-left wrap-break-word">
                         {currentQuestion.questionText}
                       </div>
                     </div>
@@ -401,7 +401,7 @@ export const EpisodeQuiz = ({ episode, initialQuestionIndex = 0 }: EpisodeQuizPr
                   <div className="w-full max-w-4xl">
                     <div className="golden-border">
                       <div className="p-4 bg-card backdrop-blur-sm rounded-xl flex items-center justify-center">
-                        <div className="text-2xl md:text-3xl lg:text-4xl font-medium text-foreground whitespace-pre-line leading-[1.4] tracking-[0.025em] text-left wrap-break-word">
+                        <div className="w-full text-2xl md:text-3xl lg:text-4xl font-medium text-foreground whitespace-pre-line leading-[1.4] tracking-[0.025em] text-left wrap-break-word">
                           {currentQuestion.questionExtraText}
                         </div>
                       </div>

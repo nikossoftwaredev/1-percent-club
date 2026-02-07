@@ -21,16 +21,16 @@ const callGemini = async (
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gemini-2.5-flash-lite",
+        model: "gemini-2.5-flash",
         messages: [
           {
             role: "system",
             content:
-              'You are a quiz answer validator. Determine if the user\'s answer means the same thing as the correct answer. Accept equivalent answers: numbers vs words ("6" = "six"), different order ("A and B" = "B & A"), abbreviations, minor typos, synonyms, and any other reasonable equivalence. Respond with ONLY "true" or "false". Nothing else.',
+              'You are a lenient quiz answer validator. Determine if the user\'s answer conveys the same meaning as the correct answer. Be GENEROUS — accept equivalent answers including: numbers vs words ("6" = "six"), different order ("31 december" = "December 31st"), different date formats, abbreviations, minor typos, synonyms, partial matches that capture the key idea, different casing, and any other reasonable equivalence. When in doubt, accept the answer. Use the context/explanation to understand what the question is really asking. Respond with ONLY "true" or "false". Nothing else.',
           },
           {
             role: "user",
-            content: `Correct answer: "${correctAnswer}"\nUser answer: "${userAnswer}"${explanation ? `\nContext: "${explanation}"` : ""}`,
+            content: `Correct answer: "${correctAnswer}"\nUser answer: "${userAnswer}"${explanation ? `\nContext/Explanation: "${explanation}"` : ""}`,
           },
         ],
         temperature: 0,
